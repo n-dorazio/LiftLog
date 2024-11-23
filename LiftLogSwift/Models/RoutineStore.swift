@@ -39,8 +39,10 @@ class RoutineStore: ObservableObject {
     func addExercise(to routineId: UUID, exercise: Exercise) {
         if let index = routines.firstIndex(where: { $0.id == routineId }) {
             routines[index].exercises.append(exercise)
+            objectWillChange.send()
         }
     }
 }
+
 
 

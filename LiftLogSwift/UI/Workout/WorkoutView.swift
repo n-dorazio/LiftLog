@@ -52,9 +52,21 @@ struct WorkoutView: View {
                     .presentationDetents([.height(250)])
             }
             .sheet(item: $selectedRoutine) { routine in
-                RoutineDetailView(routineStore: routineStore, routine: routine)
+                RoutineDetailView(routineStore: routineStore, routine: binding(for: routine))
             }
         }
+    }
+
+    private func binding(for routine: Routine) -> Binding<Routine> {
+        Binding(
+            get: { routine },
+            set: { newValue in
+                if let index = routineStore.routines.firstIndex(where: { $0.id == routine.id }) {
+                    routineStore.routines[index] = newValue
+                    routineStore.objectWillChange.send()
+                }
+            }
+        )
     }
 }
 
@@ -65,5 +77,7 @@ extension String: Identifiable {
 #Preview {
     WorkoutView()
 }
+
+
 
 

@@ -11,7 +11,7 @@ import SwiftUI
 struct AddExerciseView: View {
     @Environment(\.presentationMode) var presentationMode
     @ObservedObject var routineStore: RoutineStore
-    let routine: Routine
+    @Binding var routine: Routine
     @State private var exerciseName = ""
     @State private var duration = ""
     @State private var calories = ""
@@ -97,6 +97,7 @@ struct AddExerciseView: View {
                                 calories: calories.isEmpty ? "100Kcals" : calories,
                                 icon: selectedIcon
                             )
+                            routine.exercises.append(newExercise)
                             routineStore.addExercise(to: routine.id, exercise: newExercise)
                             presentationMode.wrappedValue.dismiss()
                         }
@@ -132,6 +133,7 @@ struct AddExerciseView: View {
         }
     }
 }
+
 
 
 
