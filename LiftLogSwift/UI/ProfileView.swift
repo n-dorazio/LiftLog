@@ -34,9 +34,15 @@ struct ProfileView: View {
                 
                 // Profile Image and Stats
                 VStack(spacing: 20) {
-                    Circle()
-                        .fill(Color.gray.opacity(0.2))
+                    Image("JaneDoe")
+                        .resizable()
+                        .aspectRatio(contentMode: .fill)
                         .frame(width: 100, height: 100)
+                        .clipShape(Circle())
+                        .overlay(
+                            Circle().stroke(Color.white, lineWidth: 2)
+                        )
+                        .shadow(radius: 5)
                     
                     HStack(spacing: 40) {
                         VStack {
@@ -124,9 +130,15 @@ struct SocialPostProfile: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
             HStack(spacing: 12) {
-                Circle()
-                    .fill(Color.gray.opacity(0.2))
-                    .frame(width: 40, height: 40)
+                Image("JaneDoe")
+                    .resizable()
+                    .aspectRatio(contentMode: .fill)
+                    .frame(width: 50, height: 50)
+                    .clipShape(Circle())
+                    .overlay(
+                        Circle().stroke(Color.white, lineWidth: 2)
+                    )
+                    .shadow(radius: 5)
                 
                 VStack(alignment: .leading) {
                     Text(username)
@@ -140,10 +152,14 @@ struct SocialPostProfile: View {
             Text(content)
                 .padding(.vertical, 4)
             
-            Rectangle()
-                .fill(Color.gray.opacity(0.1))
-                .frame(height: 200)
-                .cornerRadius(12)
+            Image("JaneDoePost")
+                .resizable()
+                .aspectRatio(contentMode: .fill)
+                .frame(width: 350, height: 300)
+                .clipShape(Rectangle())
+                .overlay(
+                    Circle().stroke(Color.white, lineWidth: 2)
+                )
             
             HStack(spacing: 30) {
                 Button(action: {}) {
