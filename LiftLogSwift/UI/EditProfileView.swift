@@ -109,4 +109,10 @@ struct EditProfileView: View {
             .navigationBarTitle("Edit Profile", displayMode: .inline)
         }
     }
-} 
+}
+
+struct EditProfileView_Previews: PreviewProvider {
+    static var previews: some View {
+        EditProfileView(userProfile: UserProfileModel())
+    }
+}

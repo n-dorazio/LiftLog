@@ -56,14 +56,6 @@ struct ExerciseListView: View {
     }
 }
 
-struct Exercise: Identifiable {
-    let id = UUID()
-    let name: String
-    let duration: String
-    let calories: String
-    let icon: String
-}
-
 struct WorkoutExerciseCard: View {
     let exercise: Exercise
     

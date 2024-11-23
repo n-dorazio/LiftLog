@@ -18,12 +18,6 @@ struct ProfileView: View {
             VStack(spacing: 24) {
                 // Profile Header
                 HStack {
-                    Button(action: {
-                        presentationMode.wrappedValue.dismiss()
-                    }) {
-                        Image(systemName: "chevron.left")
-                            .font(.title2)
-                    }
                     Spacer()
                     Text(userProfile.name)
                         .font(.title2)

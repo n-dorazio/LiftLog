@@ -10,7 +10,6 @@ import SwiftUI
 struct AddRoutineView: View {
     @Environment(\.presentationMode) var presentationMode
     @ObservedObject var routineStore: RoutineStore
-    let selectedCategory: String
     @State private var routineName = ""
     
     var body: some View {
@@ -47,7 +46,7 @@ struct AddRoutineView: View {
             
             Button(action: {
                 if !routineName.isEmpty {
-                    routineStore.addRoutine(name: routineName, category: selectedCategory)
+                    routineStore.addRoutine(name: routineName)
                     presentationMode.wrappedValue.dismiss()
                 }
             }) {
@@ -72,4 +71,5 @@ struct AddRoutineView: View {
         .background(Color.white)
     }
 }
+
 
