@@ -14,6 +14,9 @@ struct EditProfileView: View {
     @State private var tempBio: String
     @State private var tempRoutines: [String]
     
+    
+    
+    
     init(userProfile: UserProfileModel) {
         self.userProfile = userProfile
         _tempName = State(initialValue: userProfile.name)
@@ -108,5 +111,7 @@ struct EditProfileView: View {
             )
             .navigationBarTitle("Edit Profile", displayMode: .inline)
         }
+        
+        .navigationBarHidden(true)
     }
 } 
