@@ -45,9 +45,11 @@ struct SettingsView: View {
                         Button(action: {
                             showEditProfile = true
                         }) {
-                            Circle()
-                                .fill(Color.gray.opacity(0.2))
+                            Image("JaneDoe")
+                                .resizable()
+                                .aspectRatio(contentMode: .fill)
                                 .frame(width: 100, height: 100)
+                                .clipShape(Circle())
                                 .overlay(
                                     Image(systemName: "pencil.circle.fill")
                                         .foregroundColor(.blue)
@@ -189,3 +191,7 @@ struct EditableSettingRow: View {
     }
 }
 
+#Preview {
+    let mockUserProfile = UserProfileModel()
+    return SettingsView(userProfile: mockUserProfile)
+}
