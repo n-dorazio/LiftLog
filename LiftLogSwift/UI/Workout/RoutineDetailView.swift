@@ -9,9 +9,10 @@ import SwiftUI
 
 struct RoutineDetailView: View {
     @ObservedObject var routineStore: RoutineStore
-    let routine: Routine
+    @Binding var routine: Routine
     @Environment(\.presentationMode) var presentationMode
     @State private var showAddExercise = false
+    @State private var showWorkoutSession = false
     
     var body: some View {
         NavigationView {
@@ -54,12 +55,17 @@ struct RoutineDetailView: View {
                                     }
                                 }
                                 
-                                Button(action: {}) {
+                                Button(action: {
+                                    showWorkoutSession = true
+                                }) {
                                     Text("Start")
                                         .frame(maxWidth: .infinity)
                                         .padding()
                                         .background(Color.white)
                                         .cornerRadius(10)
+                                }
+                                .sheet(isPresented: $showWorkoutSession) {
+                                    WorkoutSessionView(routine: routine, exercise: exercise)
                                 }
                             }
                             .padding()
@@ -99,9 +105,11 @@ struct RoutineDetailView: View {
                 }
             )
             .sheet(isPresented: $showAddExercise) {
-                AddExerciseView(routineStore: routineStore, routine: routine)
+                AddExerciseView(routineStore: routineStore, routine: $routine)
             }
         }
     }
 }
+
+
 
