@@ -65,3 +65,7 @@ struct SocialPost: View {
         .cornerRadius(15)
     }
 }
+
+#Preview {
+    SocialView()
+}

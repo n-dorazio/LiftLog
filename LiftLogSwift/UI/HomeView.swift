@@ -18,9 +18,14 @@ struct HomeView: View {
                     HStack {
                         HStack(spacing: 12) {
                             NavigationLink(destination: ProfileView()) {
-                                Circle()
-                                    .fill(Color.gray.opacity(0.2))
+                                Image("JaneDoe")
+                                    .resizable()
+                                    .aspectRatio(contentMode: .fill)
                                     .frame(width: 50, height: 50)
+                                    .clipShape(Circle())
+                                    .overlay(
+                                        Circle().stroke(Color.white, lineWidth: 2)
+                                    )
                             }
                             
                             VStack(alignment: .leading) {
