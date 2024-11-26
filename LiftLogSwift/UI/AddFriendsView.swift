@@ -12,10 +12,10 @@ struct AddFriendsView: View {
     @State private var searchText = ""
     
     let suggestedFriends = [
-        Friend(name: "Yousri", image: "person.1"),
-        Friend(name: "Kate", image: "person.2"),
-        Friend(name: "Jordan", image: "person.3"),
-        Friend(name: "Christine Gonzales", image: "person.4")
+        Friend(name: "Yousri", image: "yousri"),
+        Friend(name: "Kate", image: "kate"),
+        Friend(name: "Jordan", image: "jordan"),
+        Friend(name: "Christine Gonzales", image: "christie")
     ]
     
     var body: some View {
@@ -41,10 +41,15 @@ struct AddFriendsView: View {
                     VStack(spacing: 12) {
                         ForEach(suggestedFriends) { friend in
                             HStack {
-                                Circle()
-                                    .fill(Color.gray.opacity(0.2))
+                                Image(friend.image)
+                                    .resizable()
+                                    .aspectRatio(contentMode: .fill)
                                     .frame(width: 50, height: 50)
-                                
+                                    .clipShape(Circle())
+                                    .overlay(
+                                        Circle().stroke(Color.white, lineWidth: 2)
+                                    )
+
                                 Text(friend.name)
                                     .font(.title3)
                                 
@@ -83,4 +88,8 @@ struct Friend: Identifiable {
     let id = UUID()
     let name: String
     let image: String
+}
+
+#Preview {
+    AddFriendsView()
 }

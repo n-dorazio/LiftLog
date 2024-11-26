@@ -26,9 +26,14 @@ struct EditProfileView: View {
             VStack(spacing: 24) {
                 // Profile Image
                 VStack(spacing: 8) {
-                    Circle()
-                        .fill(Color.gray.opacity(0.2))
+                    Image("JaneDoe")
+                        .resizable()
+                        .aspectRatio(contentMode: .fill)
                         .frame(width: 100, height: 100)
+                        .clipShape(Circle())
+                        .overlay(
+                            Circle().stroke(Color.white, lineWidth: 2)
+                        )
                     
                     Button("Edit Picture") {
                         // Handle image picker
@@ -109,4 +114,10 @@ struct EditProfileView: View {
             .navigationBarTitle("Edit Profile", displayMode: .inline)
         }
     }
-} 
+}
+
+struct EditProfileView_Previews: PreviewProvider {
+    static var previews: some View {
+        EditProfileView(userProfile: UserProfileModel())
+    }
+}
