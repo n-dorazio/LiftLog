@@ -16,13 +16,18 @@ struct SettingsView: View {
     @State private var restDayReminders = false
     @State private var waterIntakeReminders = false
     @State private var workoutReminders = true
-    @State private var weight = "140 lbs"
+    @State private var weight = "140"
     @State private var gender = "Female"
     @State private var birthday = "11/03/2003"
     @State private var username = "JaneDoe123"
     @State private var password = "•••••••••"
     @State private var showAccountOptions = false
     @State private var showEditProfile = false
+    @State private var showEditWeight = false
+    @State private var showEditGender = false
+    @State private var showEditBirthday = false
+    @State private var showEditUsername = false
+    @State private var showEditPassword = false
     
     var body: some View {
         NavigationView {
@@ -76,8 +81,8 @@ struct SettingsView: View {
                         ToggleSettingRow(icon: "bed.double", title: "Rest day Reminders", isOn: $restDayReminders, isHighlighted: true)
                         ToggleSettingRow(icon: "drop", title: "Water Intake Reminders", isOn: $waterIntakeReminders, isHighlighted: true)
                         ToggleSettingRow(icon: "bell", title: "Daily Workout Reminders", isOn: $workoutReminders, isHighlighted: true)
-                        EditableSettingRow(icon: "dumbbell", title: "Weight", value: weight)
-                        EditableSettingRow(icon: "person", title: "Gender", value: gender)
+                        EditableSettingRow(icon: "dumbbell", title: "Weight", value: weight + " lbs", screenState: $showEditWeight)
+                        EditableSettingRow(icon: "person", title: "Gender", value: gender, screenState: $showEditGender)
                         
                         // Spacer or Padding
                         Spacer()
@@ -89,9 +94,9 @@ struct SettingsView: View {
                             .frame(maxWidth: .infinity, alignment: .leading)
                         
                         // Account Settings
-                        EditableSettingRow(icon: "birthday.cake", title: "Birthday", value: birthday)
-                        EditableSettingRow(icon: "person", title: "Username", value: username)
-                        EditableSettingRow(icon: "lock", title: "Password", value: password)
+                        EditableSettingRow(icon: "birthday.cake", title: "Birthday", value: birthday, screenState: $showEditBirthday)
+                        EditableSettingRow(icon: "person", title: "Username", value: username, screenState: $showEditUsername)
+                        EditableSettingRow(icon: "lock", title: "Password", value: password, screenState: $showEditPassword)
                         
                         // Account Switch Section
                         DisclosureGroup(
@@ -143,6 +148,21 @@ struct SettingsView: View {
         .sheet(isPresented: $showEditProfile) {
             EditProfileView(userProfile: userProfile)
         }
+        .sheet(isPresented: $showEditWeight) {
+            EditWeightView(userProfile: userProfile)
+        }
+        .sheet(isPresented: $showEditGender) {
+            EditGenderView(userProfile: userProfile)
+        }
+        .sheet(isPresented: $showEditBirthday) {
+            EditBirthdayView(userProfile: userProfile)
+        }
+        .sheet(isPresented: $showEditUsername) {
+            EditUsernameView(userProfile: userProfile)
+        }
+        .sheet(isPresented: $showEditPassword) {
+            EditPasswordView(userProfile: userProfile)
+        }
     }
 }
 
@@ -173,6 +193,7 @@ struct EditableSettingRow: View {
     let icon: String
     let title: String
     let value: String
+    @Binding var screenState: Bool
     
     var body: some View {
         HStack {
@@ -182,8 +203,13 @@ struct EditableSettingRow: View {
             Spacer()
             Text(value)
                 .foregroundColor(.gray)
-            Image(systemName: "pencil")
-                .foregroundColor(.gray)
+            Button(action: {
+                screenState = true
+            }) {
+                Image(systemName: "pencil")
+                    .foregroundColor(.gray)
+            }
+            
         }
         .padding()
         .background(Color.gray.opacity(0.2))
