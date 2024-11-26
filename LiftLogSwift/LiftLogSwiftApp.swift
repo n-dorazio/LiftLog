@@ -6,7 +6,6 @@
 //
 
 import SwiftUI
-
 @main
 struct LiftLogSwiftApp: App {
     var body: some Scene {
