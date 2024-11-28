@@ -9,21 +9,28 @@ import SwiftUI
 import PhotosUI
 import CoreLocationUI
 
+struct Post: Identifiable {
+    let id = UUID() // Unique identifier for each post
+    let username: String
+    let profilePicture: String
+    let content: String
+}
+
 struct SocialView: View {
     let posts = [
-        "christie", // Replace with your asset names or URLs
-        "jordan",
-        "kate",
-        "JaneDoe",
-        "yousri"
+        Post(username: "Alice", profilePicture: "kate", content: "Just hit a new personal best on my deadlift! 🏋️"),
+        Post(username: "Bob", profilePicture: "yousri", content: "Feeling amazing after today's yoga session. 🧘"),
+        Post(username: "Charlie", profilePicture: "JaneDoe", content: "5K run completed! 🏃‍♂️ So proud of myself."),
+        Post(username: "Diana", profilePicture: "christie", content: "Loving the new HIIT workout program. 🔥"),
+        Post(username: "Eve", profilePicture: "jordan", content: "Rest day today, but staying motivated. 💪")
     ]
     
     var body: some View {
         NavigationView {
             ScrollView {
                 VStack(spacing: 20) {
-                    ForEach(posts, id: \.self) { profilePicture in
-                        SocialPost(profilePicture: profilePicture)
+                    ForEach(posts) { post in
+                        SocialPost(post: post)
                     }
                 }
                 .padding()
@@ -58,7 +65,7 @@ struct Comment: Identifiable {
 }
 
 struct SocialPost: View {
-    let profilePicture: String
+    let post: Post
     @State private var isLiked = false
     @State private var isCommenting = false
     @State private var commentText = ""
@@ -69,30 +76,30 @@ struct SocialPost: View {
         VStack(alignment: .leading, spacing: 12) {
             // User Info
             HStack {
-               // Profile Picture
-               if let uiImage = UIImage(named: profilePicture) {
-                   Image(uiImage: uiImage)
-                       .resizable()
-                       .frame(width: 40, height: 40)
-                       .clipShape(Circle())
-                       .overlay(Circle().stroke(Color.gray, lineWidth: 1))
-               } else {
-                   Circle()
-                       .frame(width: 40, height: 40)
-                       .foregroundColor(.gray)
-               }
-               VStack(alignment: .leading) {
-                   Text("User Name") // Placeholder, can also be dynamic
-                       .font(.headline)
-                   Text("2h ago") // Placeholder timestamp
-                       .font(.caption)
-                       .foregroundColor(.gray)
-               }
-               Spacer()
+                // Profile Picture
+                if let uiImage = UIImage(named: post.profilePicture) {
+                    Image(uiImage: uiImage)
+                        .resizable()
+                        .frame(width: 40, height: 40)
+                        .clipShape(Circle())
+                        .overlay(Circle().stroke(Color.gray, lineWidth: 1))
+                } else {
+                    Circle()
+                        .frame(width: 40, height: 40)
+                        .foregroundColor(.gray)
+                }
+                VStack(alignment: .leading) {
+                    Text(post.username)
+                        .font(.headline)
+                    Text("2h ago") // Placeholder timestamp
+                        .font(.caption)
+                        .foregroundColor(.gray)
+                }
+                Spacer()
             }
             
             // Post Content
-            Text("Just completed a great workout! 💪")
+            Text(post.content)
             
             // Existing Comments
             if !comments.isEmpty {
