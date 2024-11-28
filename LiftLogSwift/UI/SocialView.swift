@@ -10,12 +10,20 @@ import PhotosUI
 import CoreLocationUI
 
 struct SocialView: View {
+    let posts = [
+        "christie", // Replace with your asset names or URLs
+        "jordan",
+        "kate",
+        "JaneDoe",
+        "yousri"
+    ]
+    
     var body: some View {
         NavigationView {
             ScrollView {
                 VStack(spacing: 20) {
-                    ForEach(0..<5) { _ in
-                        SocialPost()
+                    ForEach(posts, id: \.self) { profilePicture in
+                        SocialPost(profilePicture: profilePicture)
                     }
                 }
                 .padding()
@@ -50,6 +58,7 @@ struct Comment: Identifiable {
 }
 
 struct SocialPost: View {
+    let profilePicture: String
     @State private var isLiked = false
     @State private var isCommenting = false
     @State private var commentText = ""
@@ -60,17 +69,26 @@ struct SocialPost: View {
         VStack(alignment: .leading, spacing: 12) {
             // User Info
             HStack {
-                Circle()
-                    .frame(width: 40, height: 40)
-                    .foregroundColor(.gray)
-                VStack(alignment: .leading) {
-                    Text("User Name")
-                        .font(.headline)
-                    Text("2h ago")
-                        .font(.caption)
-                        .foregroundColor(.gray)
-                }
-                Spacer()
+               // Profile Picture
+               if let uiImage = UIImage(named: profilePicture) {
+                   Image(uiImage: uiImage)
+                       .resizable()
+                       .frame(width: 40, height: 40)
+                       .clipShape(Circle())
+                       .overlay(Circle().stroke(Color.gray, lineWidth: 1))
+               } else {
+                   Circle()
+                       .frame(width: 40, height: 40)
+                       .foregroundColor(.gray)
+               }
+               VStack(alignment: .leading) {
+                   Text("User Name") // Placeholder, can also be dynamic
+                       .font(.headline)
+                   Text("2h ago") // Placeholder timestamp
+                       .font(.caption)
+                       .foregroundColor(.gray)
+               }
+               Spacer()
             }
             
             // Post Content
@@ -350,6 +368,6 @@ struct ImagePicker: UIViewControllerRepresentable {
 
 
 #Preview {
-    ContentView()
+    SocialView()
 }
 
