@@ -20,7 +20,7 @@ struct SocialView: View {
                 }
                 .padding()
             }
-            .navigationTitle("Social Feed")
+            //.navigationTitle("Social Feed")
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
                     NavigationLink(destination: CreatePostView()) {

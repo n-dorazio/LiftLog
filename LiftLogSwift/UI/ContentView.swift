@@ -47,6 +47,7 @@ struct ContentView: View {
                 .tag(4)
         }
         .accentColor(.orange)
+        .navigationBarBackButtonHidden(true) //Hides the back arrow
     }
 }
 
