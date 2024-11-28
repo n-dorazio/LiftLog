@@ -9,6 +9,7 @@ import SwiftUI
 
 struct LogView: View {
     @State private var selectedTab = "Goals"
+    @State var goals: [Goal] = []
     
     var body: some View {
         NavigationView {
@@ -22,7 +23,7 @@ struct LogView: View {
                 .padding()
                 
                 if selectedTab == "Goals" {
-                    GoalsContent()
+                    GoalsContent(goals: $goals)
                 } else {
                     LiftLogContent()
                 }
@@ -40,8 +41,9 @@ struct LogView: View {
 }
 
 struct GoalsContent: View {
-    @StateObject private var goalStore = GoalStore()
     @State private var showAddGoal = false
+    @Binding public var goals: [Goal]
+    
     
     var body: some View {
         ScrollView {
@@ -61,16 +63,16 @@ struct GoalsContent: View {
                 }
                 .padding(.horizontal)
                 .sheet(isPresented: $showAddGoal) {
-                    AddGoalView(goalStore: goalStore)
+                    AddGoalView(goals: $goals)
                 }
                 
                 // Goals List
-                if goalStore.goals.isEmpty {
+                if goals.isEmpty {
                     Text("No goals yet")
                         .foregroundColor(.gray)
                         .padding(.top, 40)
                 } else {
-                    ForEach(goalStore.goals) { goal in
+                    ForEach(goals) { goal in
                         GoalCard(goal: goal)
                     }
                 }
