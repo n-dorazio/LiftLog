@@ -20,17 +20,29 @@ struct SocialView: View {
                 }
                 .padding()
             }
-            .navigationTitle("Social Feed")
+            .navigationTitle("")
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
-                    NavigationLink(destination: CreatePostView()) {
-                        Image(systemName: "plus")
-                            .font(.system(size: 20, weight: .bold))
-                            .foregroundColor(.white)
-                            .frame(width: 40, height: 40)
-                            .background(Color.orange)
-                            .clipShape(Circle())
-                            .shadow(color: .gray.opacity(0.6), radius: 5, x: 0, y: 4)
+                    HStack(spacing: 15) {
+
+                        
+                        NavigationLink(destination: CreatePostView()) {
+                            Image(systemName: "plus")
+                                .font(.system(size: 20, weight: .bold))
+                                .foregroundColor(.white)
+                                .frame(width: 40, height: 40)
+                                .background(Color.orange)
+                                .clipShape(Circle())
+                                .shadow(color: .gray.opacity(0.6), radius: 5, x: 0, y: 4)
+                        }
+                        NavigationLink(destination: MessagingView()) {
+                            Image(systemName: "message")
+                                .font(.system(size: 15, weight: .bold))
+                                .foregroundColor(.white)
+                                .frame(width: 40, height: 40)
+                                .background(Color.orange)
+                                .clipShape(Circle())
+                            .shadow(color: .gray.opacity(0.6), radius: 5, x: 0, y: 4)}
                     }
                 }
             }
@@ -223,9 +235,101 @@ struct SocialPost: View {
 
 
 
+struct MessagingView: View {
+    let friends = ["Nathaniel", "Yousri", "Luke", "Hassan"]
+    
+    var body: some View {
+        List(friends, id: \.self) { friend in
+            NavigationLink(destination: ChatView(friend: friend)) {
+                HStack {
+                    Circle()
+                        .fill(Color.gray)
+                        .frame(width: 50, height: 65)
+                    VStack(alignment: .leading) {
+                        Text(friend)
+                            .font(.headline)
+                        Text("Last message...")
+                            .font(.subheadline)
+                            .foregroundColor(.gray)
+                    }
+                }
+            }
+        }
+        .navigationTitle("Messages")
+    }
+}
 
+struct ChatView: View {
+    let friend: String
+    @State private var messages: [Message] = []
+    @State private var newMessage = ""
+    
+    var body: some View {
+        VStack {
+            ScrollView {
+                ForEach(messages) { message in
+                    MessageBubble(message: message)
+                }
+            }
+            
+            HStack {
+                TextField("Type a message", text: $newMessage)
+                    .textFieldStyle(RoundedBorderTextFieldStyle())
+                
+                Button(action: sendMessage) {
+                    Image(systemName: "paperplane.fill")
+                }
+            }
+            .padding()
+        }
+        .navigationTitle(friend)
+        .onAppear {
+            loadMessages()
+        }
+    }
+    
+    func loadMessages() {
+        messages = [
+            Message(sender: friend, content: "Hey, how's it going?", isCurrentUser: false),
+            Message(sender: "You", content: "Good! Just finished a workout.", isCurrentUser: true),
+            Message(sender: friend, content: "Nice! What did you do?", isCurrentUser: false)
+        ]
+    }
+    
+    func sendMessage() {
+        if !newMessage.isEmpty {
+            let message = Message(sender: "You", content: newMessage, isCurrentUser: true)
+            messages.append(message)
+            newMessage = ""
+        }
+    }
+}
 
+struct Message: Identifiable {
+    let id = UUID()
+    let sender: String
+    let content: String
+    let isCurrentUser: Bool
+}
 
+struct MessageBubble: View {
+    let message: Message
+    
+    var body: some View {
+        HStack {
+            if message.isCurrentUser { Spacer() }
+            
+            Text(message.content)
+                .padding(10)
+                .background(message.isCurrentUser ? Color.blue : Color.gray.opacity(0.2))
+                .foregroundColor(message.isCurrentUser ? .white : .black)
+                .cornerRadius(10)
+            
+            if !message.isCurrentUser { Spacer() }
+        }
+        .padding(.horizontal)
+    }
+}
 
 
 struct CreatePostView: View {
