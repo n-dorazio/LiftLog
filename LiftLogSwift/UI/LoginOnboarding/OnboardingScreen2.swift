@@ -81,6 +81,7 @@ struct OnboardingScreen2: View {
                 }
             }
         }
+        .navigationBarBackButtonHidden(true) //Hides the back arrow
     }
 }
 

@@ -103,6 +103,7 @@ struct OnboardingScreen1: View {
                 .padding()
             }
         }
+        .navigationBarBackButtonHidden(true) //Hides the back arrow
     }
 }
 

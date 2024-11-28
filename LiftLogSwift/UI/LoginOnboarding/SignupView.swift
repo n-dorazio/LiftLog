@@ -131,7 +131,7 @@ struct SignupView: View {
                     
                     
                     // Sign Up Button
-                    NavigationLink(destination: ContentView(), isActive: $isLoggedIn){
+                    NavigationLink(destination: OnboardingScreen1(), isActive: $isLoggedIn){
                         Button(action: {
                             isLoggedIn=true
                         }) {
