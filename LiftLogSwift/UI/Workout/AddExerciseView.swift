@@ -14,7 +14,6 @@ struct AddExerciseView: View {
     @Binding var routine: Routine
     @State private var exerciseName = ""
     @State private var duration = ""
-    @State private var calories = ""
     @State private var selectedIcon = "figure.strengthtraining.traditional"
     
     let icons = [
@@ -22,7 +21,22 @@ struct AddExerciseView: View {
         "figure.strengthtraining.functional",
         "figure.highintensity.intervaltraining",
         "figure.core.training",
-        "figure.climbing"
+        "figure.climbing",
+        "figure.run",
+        "figure.walk",
+        "figure.boxing",
+        "figure.dance",
+        "figure.gymnastics",
+        "figure.jumprope",
+        "figure.mixed.cardio",
+        "figure.pilates",
+        "figure.pool.swim",
+        "figure.rolling",
+        "figure.skiing.crosscountry",
+        "figure.yoga",
+        "dumbbell.fill",
+        "bicycle",
+        "heart.circle.fill"
     ]
     
     var body: some View {
@@ -56,37 +70,36 @@ struct AddExerciseView: View {
                     }
                     
                     VStack(alignment: .leading, spacing: 8) {
-                        Text("Calories")
-                            .font(.title2)
-                            .bold()
-                        
-                        TextField("100Kcals", text: $calories)
-                            .padding()
-                            .background(
-                                RoundedRectangle(cornerRadius: 10)
-                                    .stroke(Color.gray.opacity(0.3), lineWidth: 1)
-                            )
-                    }
-                    
-                    VStack(alignment: .leading, spacing: 8) {
                         Text("Icon")
                             .font(.title2)
                             .bold()
                         
-                        ScrollView(.horizontal, showsIndicators: false) {
-                            HStack(spacing: 20) {
-                                ForEach(icons, id: \.self) { icon in
-                                    Image(systemName: icon)
-                                        .font(.system(size: 30))
-                                        .padding()
-                                        .background(selectedIcon == icon ? Color.gray.opacity(0.2) : Color.clear)
-                                        .clipShape(Circle())
-                                        .onTapGesture {
-                                            selectedIcon = icon
-                                        }
+                        LazyVGrid(columns: [
+                            GridItem(.flexible()),
+                            GridItem(.flexible()),
+                            GridItem(.flexible()),
+                            GridItem(.flexible())
+                        ], spacing: 15) {
+                            ForEach(icons, id: \.self) { icon in
+                                Button(action: {
+                                    selectedIcon = icon
+                                }) {
+                                    VStack {
+                                        Image(systemName: icon)
+                                            .font(.system(size: 30))
+                                            .frame(width: 60, height: 60)
+                                            .background(selectedIcon == icon ? Color.gray.opacity(0.2) : Color.clear)
+                                            .clipShape(RoundedRectangle(cornerRadius: 10))
+                                    }
                                 }
+                                .foregroundColor(.black)
                             }
                         }
+                        .padding()
+                        .background(
+                            RoundedRectangle(cornerRadius: 10)
+                                .stroke(Color.gray.opacity(0.3), lineWidth: 1)
+                        )
                     }
                     
                     Button(action: {
@@ -94,7 +107,6 @@ struct AddExerciseView: View {
                             let newExercise = Exercise(
                                 name: exerciseName,
                                 duration: duration.isEmpty ? "15 Mins" : duration,
-                                calories: calories.isEmpty ? "100Kcals" : calories,
                                 icon: selectedIcon
                             )
                             routine.exercises.append(newExercise)
