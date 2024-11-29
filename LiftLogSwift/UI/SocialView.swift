@@ -9,7 +9,24 @@ import SwiftUI
 import PhotosUI
 import CoreLocationUI
 
+
+
+struct Post: Identifiable {
+    let id = UUID() // Unique identifier for each post
+    let username: String
+    let timeAge: String
+    let profilePicture: String
+    let content: String
+}
+
 struct SocialView: View {
+    let posts = [
+        Post(username: "Jordan", timeAge: "2h ago", profilePicture: "jordan", content: "Just completed a great workout! 💪"),
+        Post(username: "Jane Doe", timeAge: "4h ago", profilePicture: "JaneDoe", content: "Loving my new fitness routine!"),
+        Post(username: "Christie", timeAge: "6h ago", profilePicture: "christie", content: "Feeling strong after today's session."),
+        Post(username: "Yousri", timeAge: "8h ago", profilePicture: "yousri", content: "Ran 5k this morning 🏃‍♀️!")
+     ]
+
     var body: some View {
         NavigationView {
             ScrollView {
