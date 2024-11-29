@@ -9,34 +9,50 @@ import SwiftUI
 import PhotosUI
 import CoreLocationUI
 
-struct SocialView: View {
-    var body: some View {
-        NavigationView {
-            ScrollView {
-                VStack(spacing: 20) {
-                    ForEach(0..<5) { _ in
-                        SocialPost()
-                    }
-                }
-                .padding()
-            }
-            .navigationTitle("Social Feed")
-            .toolbar {
-                ToolbarItem(placement: .navigationBarTrailing) {
-                    NavigationLink(destination: CreatePostView()) {
-                        Image(systemName: "plus")
-                            .font(.system(size: 20, weight: .bold))
-                            .foregroundColor(.white)
-                            .frame(width: 40, height: 40)
-                            .background(Color.orange)
-                            .clipShape(Circle())
-                            .shadow(color: .gray.opacity(0.6), radius: 5, x: 0, y: 4)
-                    }
-                }
-            }
-        }
-    }
+
+struct Post: Identifiable {
+    let id = UUID() // Unique identifier
+    let username: String
+    let timeAgo: String
+    let content: String
+    let profilePicture: String
 }
+
+
+struct SocialView: View {
+    let posts = [
+         Post(username: "Jordan", timeAgo: "2h ago", content: "Just completed a great workout! 💪", profilePicture: "jordan"),
+         Post(username: "Jane Doe", timeAgo: "4h ago", content: "Loving my new fitness routine!", profilePicture: "JaneDoe"),
+         Post(username: "Christie", timeAgo: "6h ago", content: "Feeling strong after today's session.", profilePicture: "christie"),
+         Post(username: "Yousri", timeAgo: "8h ago", content: "Ran 5k this morning 🏃‍♀️!", profilePicture: "yousri")
+     ]
+     
+     var body: some View {
+         NavigationView {
+             ScrollView {
+                 VStack(spacing: 20) {
+                     ForEach(posts) { post in
+                         SocialPost(post: post)
+                     }
+                 }
+                 .padding()
+             }
+             .toolbar {
+                 ToolbarItem(placement: .navigationBarTrailing) {
+                     NavigationLink(destination: CreatePostView()) {
+                         Image(systemName: "plus")
+                             .font(.system(size: 20, weight: .bold))
+                             .foregroundColor(.white)
+                             .frame(width: 40, height: 40)
+                             .background(Color.orange)
+                             .clipShape(Circle())
+                             .shadow(color: .gray.opacity(0.6), radius: 5, x: 0, y: 4)
+                     }
+                 }
+             }
+         }
+     }
+ }
 
 
 
@@ -50,6 +66,9 @@ struct Comment: Identifiable {
 }
 
 struct SocialPost: View {
+    
+    let post: Post
+    
     @State private var isLiked = false
     @State private var isCommenting = false
     @State private var commentText = ""
@@ -58,23 +77,25 @@ struct SocialPost: View {
     
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
-            // User Info
-            HStack {
-                Circle()
-                    .frame(width: 40, height: 40)
-                    .foregroundColor(.gray)
-                VStack(alignment: .leading) {
-                    Text("User Name")
-                        .font(.headline)
-                    Text("2h ago")
-                        .font(.caption)
-                        .foregroundColor(.gray)
-                }
-                Spacer()
+                    // User Info
+                    HStack {
+                        Image(post.profilePicture)
+                            .resizable()
+                            .frame(width: 40, height: 40)
+                            .clipShape(Circle())
+                            .foregroundColor(.gray)
+                        VStack(alignment: .leading) {
+                            Text(post.username)
+                                .font(.headline)
+                            Text(post.timeAgo)
+                                .font(.caption)
+                                .foregroundColor(.gray)
+                        }
+                        Spacer()
             }
             
             // Post Content
-            Text("Just completed a great workout! 💪")
+            Text(post.content)
             
             // Existing Comments
             if !comments.isEmpty {
