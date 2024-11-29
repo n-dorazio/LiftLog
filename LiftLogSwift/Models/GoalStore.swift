@@ -6,9 +6,10 @@
 //
 
 import Foundation
+import SwiftUI
 
 class GoalStore: ObservableObject {
-    @Published var goals: [Goal] = []
+    private var internalGoals: [Goal]
     
     func addGoal(type: String, targetWeight: Double, deadline: Date, notes: String) {
         let newGoal = Goal(
@@ -18,6 +19,14 @@ class GoalStore: ObservableObject {
             notes: notes,
             progress: []
         )
-        goals.append(newGoal)
+        internalGoals.append(newGoal)
+    }
+    
+    init (internalGoals: inout [Goal]) {
+        self.internalGoals = internalGoals
+    }
+    
+    func syncWithExternalArray(to array: inout [Goal]) {
+        array = internalGoals
     }
 }
