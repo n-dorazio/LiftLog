@@ -11,11 +11,47 @@ import CoreLocationUI
 
 
 struct Post: Identifiable {
-    let id = UUID() // Unique identifier
+    let id = UUID() // Unique identifier for each post
     let username: String
-    let timeAgo: String
-    let content: String
     let profilePicture: String
+    let content: String
+}
+
+struct SocialView: View {
+    let posts = [
+        Post(username: "Alice", profilePicture: "kate", content: "Just hit a new personal best on my deadlift! 🏋️"),
+        Post(username: "Bob", profilePicture: "yousri", content: "Feeling amazing after today's yoga session. 🧘"),
+        Post(username: "Charlie", profilePicture: "JaneDoe", content: "5K run completed! 🏃‍♂️ So proud of myself."),
+        Post(username: "Diana", profilePicture: "christie", content: "Loving the new HIIT workout program. 🔥"),
+        Post(username: "Eve", profilePicture: "jordan", content: "Rest day today, but staying motivated. 💪")
+    ]
+    
+    var body: some View {
+        NavigationView {
+            ScrollView {
+                VStack(spacing: 20) {
+                    ForEach(posts) { post in
+                        SocialPost(post: post)
+                    }
+                }
+                .padding()
+            }
+            .navigationTitle("Social Feed")
+            .toolbar {
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    NavigationLink(destination: CreatePostView()) {
+                        Image(systemName: "plus")
+                            .font(.system(size: 20, weight: .bold))
+                            .foregroundColor(.white)
+                            .frame(width: 40, height: 40)
+                            .background(Color.orange)
+                            .clipShape(Circle())
+                            .shadow(color: .gray.opacity(0.6), radius: 5, x: 0, y: 4)
+                    }
+                }
+            }
+        }
+    }
 }
 
 
@@ -66,9 +102,8 @@ struct Comment: Identifiable {
 }
 
 struct SocialPost: View {
-    
     let post: Post
-    
+
     @State private var isLiked = false
     @State private var isCommenting = false
     @State private var commentText = ""
@@ -77,21 +112,28 @@ struct SocialPost: View {
     
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
-                    // User Info
-                    HStack {
-                        Image(post.profilePicture)
-                            .resizable()
-                            .frame(width: 40, height: 40)
-                            .clipShape(Circle())
-                            .foregroundColor(.gray)
-                        VStack(alignment: .leading) {
-                            Text(post.username)
-                                .font(.headline)
-                            Text(post.timeAgo)
-                                .font(.caption)
-                                .foregroundColor(.gray)
-                        }
-                        Spacer()
+            // User Info
+            HStack {
+                // Profile Picture
+                if let uiImage = UIImage(named: post.profilePicture) {
+                    Image(uiImage: uiImage)
+                        .resizable()
+                        .frame(width: 40, height: 40)
+                        .clipShape(Circle())
+                        .overlay(Circle().stroke(Color.gray, lineWidth: 1))
+                } else {
+                    Circle()
+                        .frame(width: 40, height: 40)
+                        .foregroundColor(.gray)
+                }
+                VStack(alignment: .leading) {
+                    Text(post.username)
+                        .font(.headline)
+                    Text("2h ago") // Placeholder timestamp
+                        .font(.caption)
+                        .foregroundColor(.gray)
+                }
+                Spacer()
             }
             
             // Post Content
@@ -371,6 +413,6 @@ struct ImagePicker: UIViewControllerRepresentable {
 
 
 #Preview {
-    ContentView()
+    SocialView()
 }
 
