@@ -45,7 +45,7 @@ struct PasswordSentView: View {
                 
                 // Description
                 Text("""
-                We’ve sent a password reset link to jo***oe@gmail.com.
+                We’ve sent a password reset link to il*******@gmail.com.
                 Resend if the link is not received!
                 """)
                 .font(.body)

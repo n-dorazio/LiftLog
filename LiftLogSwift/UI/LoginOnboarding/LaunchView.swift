@@ -25,10 +25,10 @@ struct LaunchView: View{
                 .ignoresSafeArea()
                 VStack{
                     Spacer()
-                    Image("icon") //Add Icon
+                    Image("AppLogo") //Add Icon
                         .resizable()
                         .frame(width: 100, height: 100)
-                        .clipShape(Circle())
+                        .clipShape(RoundedRectangle(cornerRadius: 12))
                         .padding(.bottom, 20)
                     
                     Text("FIND OUT WHAT DIET & TRAINING WILL WORK SPECIFICALLY FOR YOU")
@@ -46,8 +46,8 @@ struct LaunchView: View{
                                     .font(.headline)
                                     .foregroundColor(.black)
                                 //Spacer()
-                                Image(systemName: "arrow.right")
-                                    .foregroundColor(.black)
+                                //Image(systemName: "arrow.right")
+                                  //.foregroundColor(.black)
                             }
                             .padding()
                             .padding(.horizontal, 16)

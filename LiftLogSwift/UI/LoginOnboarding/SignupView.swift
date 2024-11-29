@@ -35,12 +35,12 @@ struct SignupView: View {
                 VStack {
                     // Top Icon
                     Spacer()
-                    Image("icon") //Add Icon
+                    Image("AppLogo") //Add Icon
                         .resizable()
                         .frame(width: 100, height: 100)
-                        .clipShape(Circle())
+                        .clipShape(RoundedRectangle(cornerRadius: 12))
+                        .offset(x:0, y:0)
                         .padding(.bottom, 20)
-                    
                     // Title
                     Text("Sign up for FREE")
                         .font(.largeTitle)
