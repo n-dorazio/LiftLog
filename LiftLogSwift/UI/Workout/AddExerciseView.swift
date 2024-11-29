@@ -15,6 +15,7 @@ struct AddExerciseView: View {
     @State private var exerciseName = ""
     @State private var duration = ""
     @State private var selectedIcon = "figure.strengthtraining.traditional"
+    @State private var isIconGridExpanded = false
     
     let icons = [
         "figure.strengthtraining.traditional",
@@ -70,36 +71,49 @@ struct AddExerciseView: View {
                     }
                     
                     VStack(alignment: .leading, spacing: 8) {
-                        Text("Icon")
-                            .font(.title2)
-                            .bold()
-                        
-                        LazyVGrid(columns: [
-                            GridItem(.flexible()),
-                            GridItem(.flexible()),
-                            GridItem(.flexible()),
-                            GridItem(.flexible())
-                        ], spacing: 15) {
-                            ForEach(icons, id: \.self) { icon in
-                                Button(action: {
-                                    selectedIcon = icon
-                                }) {
-                                    VStack {
-                                        Image(systemName: icon)
-                                            .font(.system(size: 30))
-                                            .frame(width: 60, height: 60)
-                                            .background(selectedIcon == icon ? Color.gray.opacity(0.2) : Color.clear)
-                                            .clipShape(RoundedRectangle(cornerRadius: 10))
-                                    }
-                                }
-                                .foregroundColor(.black)
+                        Button(action: {
+                            withAnimation {
+                                isIconGridExpanded.toggle()
+                            }
+                        }) {
+                            HStack {
+                                Text("Icon")
+                                    .font(.title2)
+                                    .bold()
+                                Spacer()
+                                Image(systemName: isIconGridExpanded ? "chevron.up" : "chevron.down")
+                                    .foregroundColor(.gray)
                             }
                         }
-                        .padding()
-                        .background(
-                            RoundedRectangle(cornerRadius: 10)
-                                .stroke(Color.gray.opacity(0.3), lineWidth: 1)
-                        )
+                        
+                        if isIconGridExpanded {
+                            LazyVGrid(columns: [
+                                GridItem(.flexible()),
+                                GridItem(.flexible()),
+                                GridItem(.flexible()),
+                                GridItem(.flexible())
+                            ], spacing: 15) {
+                                ForEach(icons, id: \.self) { icon in
+                                    Button(action: {
+                                        selectedIcon = icon
+                                    }) {
+                                        VStack {
+                                            Image(systemName: icon)
+                                                .font(.system(size: 30))
+                                                .frame(width: 60, height: 60)
+                                                .background(selectedIcon == icon ? Color.gray.opacity(0.2) : Color.clear)
+                                                .clipShape(RoundedRectangle(cornerRadius: 10))
+                                        }
+                                    }
+                                    .foregroundColor(.black)
+                                }
+                            }
+                            .padding()
+                            .background(
+                                RoundedRectangle(cornerRadius: 10)
+                                    .stroke(Color.gray.opacity(0.3), lineWidth: 1)
+                            )
+                        }
                     }
                     
                     Button(action: {

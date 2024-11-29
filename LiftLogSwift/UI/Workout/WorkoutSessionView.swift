@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import Combine
 
 struct WorkoutSessionView: View {
     let routine: Routine
@@ -15,8 +16,16 @@ struct WorkoutSessionView: View {
     @State private var isCountingDown = true
     @State private var sets: [Set] = [Set(reps: "", weight: "")]
     @State private var showSkipAlert = false
+    @State private var elapsedTime = 0
+    @State private var isPaused = false
     
     let timer = Timer.publish(every: 1, on: .main, in: .common).autoconnect()
+    
+    func formatTime(_ seconds: Int) -> String {
+        let minutes = seconds / 60
+        let remainingSeconds = seconds % 60
+        return String(format: "%02d:%02d", minutes, remainingSeconds)
+    }
     
     var body: some View {
         ZStack {
@@ -57,14 +66,24 @@ struct WorkoutSessionView: View {
                         .padding(.top, 30)
                     }
                 } else {
-                    // Updated Exercise Tracking View
                     VStack(spacing: 20) {
                         Text(exercise.name)
                             .font(.title)
                             .bold()
                         
-                        Image(systemName: exercise.icon)
-                            .font(.system(size: 80))
+                        // Timer Display
+                        Text(formatTime(elapsedTime))
+                            .font(.system(size: 40, weight: .bold))
+                            .monospacedDigit()
+                        
+                        // Pause/Resume Button
+                        Button(action: {
+                            isPaused.toggle()
+                        }) {
+                            Image(systemName: isPaused ? "play.circle.fill" : "pause.circle.fill")
+                                .font(.system(size: 40))
+                                .foregroundColor(.orange)
+                        }
                         
                         // Sets tracking
                         VStack(alignment: .leading, spacing: 16) {
@@ -241,6 +260,8 @@ struct WorkoutSessionView: View {
                 } else {
                     isCountingDown = false
                 }
+            } else if !isPaused {
+                elapsedTime += 1
             }
         }
         .navigationBarItems(
