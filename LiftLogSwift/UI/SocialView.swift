@@ -13,19 +13,18 @@ import CoreLocationUI
 struct Post: Identifiable {
     let id = UUID() // Unique identifier for each post
     let username: String
+    let timeAge: String
     let profilePicture: String
     let content: String
 }
 
 struct SocialView: View {
     let posts = [
-        Post(username: "Alice", profilePicture: "kate", content: "Just hit a new personal best on my deadlift! 🏋️"),
-        Post(username: "Bob", profilePicture: "yousri", content: "Feeling amazing after today's yoga session. 🧘"),
-        Post(username: "Charlie", profilePicture: "JaneDoe", content: "5K run completed! 🏃‍♂️ So proud of myself."),
-        Post(username: "Diana", profilePicture: "christie", content: "Loving the new HIIT workout program. 🔥"),
-        Post(username: "Eve", profilePicture: "jordan", content: "Rest day today, but staying motivated. 💪")
-    ]
-    
+        Post(username: "Jordan", timeAge: "2h ago", profilePicture: "jordan", content: "Just completed a great workout! 💪"),
+        Post(username: "Jane Doe", timeAge: "4h ago", profilePicture: "JaneDoe", content: "Loving my new fitness routine!"),
+        Post(username: "Christie", timeAge: "6h ago", profilePicture: "christie", content: "Feeling strong after today's session."),
+        Post(username: "Yousri", timeAge: "8h ago", profilePicture: "yousri", content: "Ran 5k this morning 🏃‍♀️!")
+     ]
     var body: some View {
         NavigationView {
             ScrollView {
@@ -65,43 +64,6 @@ struct SocialView: View {
         }
     }
 }
-
-
-struct SocialView: View {
-    let posts = [
-         Post(username: "Jordan", timeAgo: "2h ago", content: "Just completed a great workout! 💪", profilePicture: "jordan"),
-         Post(username: "Jane Doe", timeAgo: "4h ago", content: "Loving my new fitness routine!", profilePicture: "JaneDoe"),
-         Post(username: "Christie", timeAgo: "6h ago", content: "Feeling strong after today's session.", profilePicture: "christie"),
-         Post(username: "Yousri", timeAgo: "8h ago", content: "Ran 5k this morning 🏃‍♀️!", profilePicture: "yousri")
-     ]
-     
-     var body: some View {
-         NavigationView {
-             ScrollView {
-                 VStack(spacing: 20) {
-                     ForEach(posts) { post in
-                         SocialPost(post: post)
-                     }
-                 }
-                 .padding()
-             }
-             .toolbar {
-                 ToolbarItem(placement: .navigationBarTrailing) {
-                     NavigationLink(destination: CreatePostView()) {
-                         Image(systemName: "plus")
-                             .font(.system(size: 20, weight: .bold))
-                             .foregroundColor(.white)
-                             .frame(width: 40, height: 40)
-                             .background(Color.orange)
-                             .clipShape(Circle())
-                             .shadow(color: .gray.opacity(0.6), radius: 5, x: 0, y: 4)
-                     }
-                 }
-             }
-         }
-     }
- }
-
 
 
 
