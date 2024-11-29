@@ -10,7 +10,7 @@ import SwiftUI
 struct LiftLogSwiftApp: App {
     var body: some Scene {
         WindowGroup {
-            ContentView()
+            LaunchView()
         }
     }
 }

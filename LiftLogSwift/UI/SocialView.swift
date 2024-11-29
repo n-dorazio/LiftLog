@@ -9,6 +9,7 @@ import SwiftUI
 import PhotosUI
 import CoreLocationUI
 
+
 struct Post: Identifiable {
     let id = UUID() // Unique identifier for each post
     let username: String
@@ -54,6 +55,42 @@ struct SocialView: View {
 }
 
 
+struct SocialView: View {
+    let posts = [
+         Post(username: "Jordan", timeAgo: "2h ago", content: "Just completed a great workout! 💪", profilePicture: "jordan"),
+         Post(username: "Jane Doe", timeAgo: "4h ago", content: "Loving my new fitness routine!", profilePicture: "JaneDoe"),
+         Post(username: "Christie", timeAgo: "6h ago", content: "Feeling strong after today's session.", profilePicture: "christie"),
+         Post(username: "Yousri", timeAgo: "8h ago", content: "Ran 5k this morning 🏃‍♀️!", profilePicture: "yousri")
+     ]
+     
+     var body: some View {
+         NavigationView {
+             ScrollView {
+                 VStack(spacing: 20) {
+                     ForEach(posts) { post in
+                         SocialPost(post: post)
+                     }
+                 }
+                 .padding()
+             }
+             .toolbar {
+                 ToolbarItem(placement: .navigationBarTrailing) {
+                     NavigationLink(destination: CreatePostView()) {
+                         Image(systemName: "plus")
+                             .font(.system(size: 20, weight: .bold))
+                             .foregroundColor(.white)
+                             .frame(width: 40, height: 40)
+                             .background(Color.orange)
+                             .clipShape(Circle())
+                             .shadow(color: .gray.opacity(0.6), radius: 5, x: 0, y: 4)
+                     }
+                 }
+             }
+         }
+     }
+ }
+
+
 
 
 // Define the Comment struct
@@ -66,6 +103,7 @@ struct Comment: Identifiable {
 
 struct SocialPost: View {
     let post: Post
+
     @State private var isLiked = false
     @State private var isCommenting = false
     @State private var commentText = ""
