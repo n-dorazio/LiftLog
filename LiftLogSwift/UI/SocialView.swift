@@ -4,7 +4,6 @@
 //
 //  Created by Nathaniel D'Orazio on 2024-11-21.
 //
-
 import SwiftUI
 import PhotosUI
 import CoreLocationUI
@@ -25,24 +24,25 @@ struct SocialView: View {
         Post(username: "Jane Doe", timeAge: "4h ago", profilePicture: "JaneDoe", content: "Loving my new fitness routine!"),
         Post(username: "Christie", timeAge: "6h ago", profilePicture: "christie", content: "Feeling strong after today's session."),
         Post(username: "Yousri", timeAge: "8h ago", profilePicture: "yousri", content: "Ran 5k this morning 🏃‍♀️!")
-     ]
+    ]
 
     var body: some View {
         NavigationView {
             ScrollView {
                 VStack(spacing: 20) {
-                    ForEach(0..<5) { _ in
-                        SocialPost()
+                    // Use ForEach to dynamically create posts
+                    ForEach(posts) { post in
+                        SocialPost(post: post) // Pass each post to SocialPost
                     }
                 }
                 .padding()
             }
-            .navigationTitle("")
+            .navigationTitle("Social Feed")
             .toolbar {
+                // Add Post (+) and Messages Buttons
                 ToolbarItem(placement: .navigationBarTrailing) {
                     HStack(spacing: 15) {
-
-                        
+                        // Add Post Button
                         NavigationLink(destination: CreatePostView()) {
                             Image(systemName: "plus")
                                 .font(.system(size: 20, weight: .bold))
@@ -52,6 +52,7 @@ struct SocialView: View {
                                 .clipShape(Circle())
                                 .shadow(color: .gray.opacity(0.6), radius: 5, x: 0, y: 4)
                         }
+                        // Messages Button
                         NavigationLink(destination: MessagingView()) {
                             Image(systemName: "message")
                                 .font(.system(size: 15, weight: .bold))
@@ -59,13 +60,15 @@ struct SocialView: View {
                                 .frame(width: 40, height: 40)
                                 .background(Color.orange)
                                 .clipShape(Circle())
-                            .shadow(color: .gray.opacity(0.6), radius: 5, x: 0, y: 4)}
+                                .shadow(color: .gray.opacity(0.6), radius: 5, x: 0, y: 4)
+                        }
                     }
                 }
             }
         }
     }
 }
+
 
 
 
@@ -79,114 +82,103 @@ struct Comment: Identifiable {
 }
 
 struct SocialPost: View {
-    @State private var isLiked = false
-    @State private var isCommenting = false
-    @State private var commentText = ""
-    @State private var comments: [Comment] = [] // List of comments
-    @State private var showShareSheet = false // State to control share sheet visibility
-    
-    var body: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            // User Info
-            HStack {
-                Circle()
-                    .frame(width: 40, height: 40)
-                    .foregroundColor(.gray)
-                VStack(alignment: .leading) {
-                    Text("User Name")
-                        .font(.headline)
-                    Text("2h ago")
-                        .font(.caption)
-                        .foregroundColor(.gray)
-                }
-                Spacer()
-            }
-            
-            // Post Content
-            Text("Just completed a great workout! 💪")
-            
-            // Existing Comments
-            if !comments.isEmpty {
-                Text("Comments:")
-                    .font(.headline)
-                
-                ForEach(comments) { comment in
-                    HStack(alignment: .top) {
-                        // Profile Picture
-                        Image(comment.profilePicture)
-                            .resizable()
-                            .frame(width: 40, height: 40)
-                            .clipShape(Circle())
-                            .overlay(Circle().stroke(Color.gray, lineWidth: 1))
-                        
-                        VStack(alignment: .leading) {
-                            // Username
-                            Text(comment.username)
-                                .font(.subheadline)
-                                .fontWeight(.bold)
-                            // Comment Text
-                            Text(comment.text)
-                                .font(.body)
-                        }
-                        Spacer()
+    let post: Post // Receive the Post object for dynamic data
+
+        @State private var isLiked = false
+        @State private var isCommenting = false
+        @State private var commentText = ""
+        @State private var comments: [Comment] = [] // Dynamic list of comments
+        @State private var showShareSheet = false
+
+        var body: some View {
+            VStack(alignment: .leading, spacing: 12) {
+                // User Info
+                HStack {
+                    Image(post.profilePicture) // Display the actual profile picture
+                        .resizable()
+                        .frame(width: 40, height: 40)
+                        .clipShape(Circle())
+                    VStack(alignment: .leading) {
+                        Text(post.username) // Display the username
+                            .font(.headline)
+                        Text(post.timeAge) // Display the time ago
+                            .font(.caption)
+                            .foregroundColor(.gray)
                     }
-                    .padding(.leading, 20) // Indentation for comments
-                    .padding(.vertical, 4)
+                    Spacer()
                 }
-            }
-            
-            // Interaction Buttons
-            HStack {
-                Button(action: {
-                    isLiked.toggle()
-                }) {
-                    Label("Like", systemImage: isLiked ? "heart.fill" : "heart")
-                        .foregroundColor(isLiked ? .red : .gray)
-                }
-                Spacer()
-                Button(action: {
-                    isCommenting = true // Show the comment modal
-                }) {
-                    Label("Comment", systemImage: "message")
-                        .foregroundColor(.gray)
-                }
-                .sheet(isPresented: $isCommenting) {
-                    CommentModalView(
-                        commentText: $commentText,
-                        onCancel: { isCommenting = false },
-                        onPost: { commentText in
-                            // Add a new comment with placeholder data
-                            let newComment = Comment(
-                                username: "Current User",
-                                profilePicture: "profile_placeholder", // Replace with actual image name
-                                text: commentText
-                            )
-                            comments.append(newComment)
-                            isCommenting = false // Dismiss the modal
-                        }
-                    )
-                }
-                Spacer()
-                
-                Button(action: {
-                    showShareSheet = true // Trigger the share sheet
-                }) {
-                    Label("Share", systemImage: "square.and.arrow.up")
+
+                // Post Content
+                Text(post.content) // Display the actual post content
+
+                // Comments Section
+                if !comments.isEmpty {
+                    Text("Comments:")
                         .font(.headline)
+
+                    ForEach(comments) { comment in
+                        HStack(alignment: .top) {
+                            Image(comment.profilePicture) // Commenter's profile picture
+                                .resizable()
+                                .frame(width: 40, height: 40)
+                                .clipShape(Circle())
+                                .overlay(Circle().stroke(Color.gray, lineWidth: 1))
+                            
+                            VStack(alignment: .leading) {
+                                Text(comment.username) // Commenter's username
+                                    .font(.subheadline)
+                                    .fontWeight(.bold)
+                                Text(comment.text) // Comment text
+                                    .font(.body)
+                            }
+                            Spacer()
+                        }
+                        .padding(.leading, 20)
+                        .padding(.vertical, 4)
+                    }
                 }
-                
-                .sheet(isPresented: $showShareSheet) {
-                    ShareSheet(items: [
-                        "Check out my workout progress! 💪", // Text to share
-                        URL(string: "https://example.com/workout")! // Optional URL
-                    ])
-                    
+
+                // Interaction Buttons
+                HStack {
+                    Button(action: { isLiked.toggle() }) {
+                        Label("Like", systemImage: isLiked ? "heart.fill" : "heart")
+                            .foregroundColor(isLiked ? .red : .gray)
+                    }
+                    Spacer()
+                    Button(action: { isCommenting = true }) {
+                        Label("Comment", systemImage: "message")
+                            .foregroundColor(.gray)
+                    }
+                    .sheet(isPresented: $isCommenting) {
+                        CommentModalView(
+                            commentText: $commentText,
+                            onCancel: { isCommenting = false },
+                            onPost: { commentText in
+                                // Add a new comment dynamically
+                                let newComment = Comment(
+                                    username: "Current User",
+                                    profilePicture: "profile_placeholder", // Replace with actual profile picture
+                                    text: commentText
+                                )
+                                comments.append(newComment) // Append the comment
+                                isCommenting = false // Close modal
+                            }
+                        )
+                    }
+                    Spacer()
+                    Button(action: { showShareSheet = true }) {
+                        Label("Share", systemImage: "square.and.arrow.up")
+                            .font(.headline)
+                    }
+                    .sheet(isPresented: $showShareSheet) {
+                        ShareSheet(items: [post.content])
+                    }
+                    .foregroundColor(.gray)
                 }
-                .foregroundColor(.gray)
+                .padding()
+                .background(Color.gray.opacity(0.1))
+                .cornerRadius(15)
             }
-            .padding()
-            .background(Color.gray.opacity(0.1))
-            .cornerRadius(15)
         }
     }
     
@@ -246,81 +238,103 @@ struct SocialPost: View {
         }
     }
     
+
+
+struct ChatFriend: Identifiable {
+    let id = UUID()
+    let username: String
+    let profilePicture: String // Image name in asset catalog
+    let lastMessage: String
 }
 
-
-
-
-
 struct MessagingView: View {
-    let friends = ["Nathaniel", "Yousri", "Luke", "Hassan"]
-    
+    let friends = [
+        ChatFriend(username: "Nathaniel", profilePicture: "Nathaniel", lastMessage: ""),
+        ChatFriend(username: "Yousri", profilePicture: "yousri", lastMessage: "See you at the gym!"),
+        ChatFriend(username: "Luke", profilePicture: "Luke", lastMessage: "Let's plan for tomorrow."),
+        ChatFriend(username: "Hassan", profilePicture: "Hassan", lastMessage: "Can you send me the file?")
+    ]
+
     var body: some View {
-        List(friends, id: \.self) { friend in
+        List(friends) { friend in
             NavigationLink(destination: ChatView(friend: friend)) {
                 HStack {
-                    Circle()
-                        .fill(Color.gray)
-                        .frame(width: 50, height: 65)
+                    // Profile Picture
+                    Image(friend.profilePicture)
+                        .resizable()
+                        .frame(width: 50, height: 50)
+                        .clipShape(Circle())
+                        .overlay(Circle().stroke(Color.gray, lineWidth: 1))
+                    
                     VStack(alignment: .leading) {
-                        Text(friend)
+                        Text(friend.username)
                             .font(.headline)
-                        Text("Last message...")
+                        Text(friend.lastMessage)
                             .font(.subheadline)
                             .foregroundColor(.gray)
+                            .lineLimit(1)
                     }
+                    Spacer()
                 }
+                .padding(.vertical, 8)
             }
         }
         .navigationTitle("Messages")
     }
 }
 
+
 struct ChatView: View {
-    let friend: String
-    @State private var messages: [Message] = []
+    let friend: ChatFriend
+    @State private var messages: [Message] = [] // Start with an empty array
     @State private var newMessage = ""
-    
+
     var body: some View {
         VStack {
+            // Display Messages
             ScrollView {
                 ForEach(messages) { message in
                     MessageBubble(message: message)
                 }
             }
-            
+            .padding(.vertical)
+
+            // Input Box for Sending Messages
             HStack {
                 TextField("Type a message", text: $newMessage)
                     .textFieldStyle(RoundedBorderTextFieldStyle())
                 
                 Button(action: sendMessage) {
                     Image(systemName: "paperplane.fill")
+                        .foregroundColor(.blue)
                 }
             }
             .padding()
         }
-        .navigationTitle(friend)
-        .onAppear {
-            loadMessages()
-        }
+        .navigationTitle(friend.username)
     }
-    
-    func loadMessages() {
-        messages = [
-            Message(sender: friend, content: "Hey, how's it going?", isCurrentUser: false),
-            Message(sender: "You", content: "Good! Just finished a workout.", isCurrentUser: true),
-            Message(sender: friend, content: "Nice! What did you do?", isCurrentUser: false)
-        ]
-    }
-    
+
+    // Function to Send a Message
     func sendMessage() {
-        if !newMessage.isEmpty {
-            let message = Message(sender: "You", content: newMessage, isCurrentUser: true)
-            messages.append(message)
-            newMessage = ""
+        guard !newMessage.isEmpty else { return }
+
+        // Add the user's message
+        let userMessage = Message(sender: "You", content: newMessage, isCurrentUser: true)
+        messages.append(userMessage)
+
+        // Auto-reply logic
+        if newMessage.lowercased() == "hi" {
+            DispatchQueue.main.asyncAfter(deadline: .now() + 1) { // Delay to simulate typing
+                let reply = Message(sender: friend.username, content: "Hi, how are you?", isCurrentUser: false)
+                messages.append(reply)
+            }
         }
+
+        // Clear the input field
+        newMessage = ""
     }
 }
+
 
 struct Message: Identifiable {
     let id = UUID()
@@ -331,7 +345,7 @@ struct Message: Identifiable {
 
 struct MessageBubble: View {
     let message: Message
-    
+
     var body: some View {
         HStack {
             if message.isCurrentUser { Spacer() }
@@ -347,6 +361,7 @@ struct MessageBubble: View {
         .padding(.horizontal)
     }
 }
+
 
 
 struct CreatePostView: View {
