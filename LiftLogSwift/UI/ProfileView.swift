@@ -6,28 +6,40 @@
 //
 
 import SwiftUI
+import UIKit
+
+// MARK: - User Profile Model
+
+struct Friends: Identifiable {
+    let id = UUID()
+    let name: String
+    let image: String // Name of the image asset
+}
+
 
 struct ProfileView: View {
     @Environment(\.presentationMode) var presentationMode
     @State private var showSettings = false
     @State private var showAddFriends = false
+    @State private var showFriendsList = false
     @StateObject private var userProfile = UserProfileModel()
-    
+
     var body: some View {
         ScrollView {
             VStack(spacing: 24) {
                 // Profile Header
-                HStack {
-                    Spacer()
+                ZStack {
                     Text(userProfile.name)
                         .font(.title2)
                         .bold()
-                    Spacer()
-                    Button(action: {
-                        showSettings = true
-                    }) {
-                        Image(systemName: "gearshape")
-                            .font(.title2)
+                    HStack {
+                        Spacer()
+                        Button(action: {
+                            showSettings = true
+                        }) {
+                            Image(systemName: "gearshape")
+                                .font(.title2)
+                        }
                     }
                 }
                 .padding(.horizontal)
@@ -53,12 +65,17 @@ struct ProfileView: View {
                                 .foregroundColor(.gray)
                         }
                         
-                        VStack {
-                            Text("124")
-                                .font(.title2)
-                                .bold()
-                            Text("Friends")
-                                .foregroundColor(.gray)
+                        // Friends Count as Button
+                        Button(action: {
+                            showFriendsList = true
+                        }) {
+                            VStack {
+                                Text("\(userProfile.friends.count)")
+                                    .font(.title2)
+                                    .bold()
+                                Text("Friends")
+                                    .foregroundColor(.gray)
+                            }
                         }
                         
                         Button(action: {
@@ -103,34 +120,78 @@ struct ProfileView: View {
                         username: "Jane Doe",
                         timeAgo: "2s ago",
                         content: "Hey Pookies! Just started using this amazing app called LiftLog. Now my fitness goals seem achievable!!",
-                        likes: "121",
+                        likes: 121,
                         comments: "34"
                     )
                 }
                 .padding(.horizontal)
             }
         }
-        .navigationBarHidden(true)
         .sheet(isPresented: $showSettings) {
             SettingsView(userProfile: userProfile)
         }
         .sheet(isPresented: $showAddFriends) {
             AddFriendsView()
         }
+        .sheet(isPresented: $showFriendsList) {
+            FriendsListView(friends: userProfile.friends)
+        }
     }
 }
+
+struct FriendsListView: View {
+    let friends: [Friends]
+    @Environment(\.dismiss) var dismiss
+
+    var body: some View {
+        NavigationView {
+            List(friends) { friend in
+                HStack {
+                    Image(friend.image)
+                        .resizable()
+                        .aspectRatio(contentMode: .fill)
+                        .frame(width: 50, height: 50)
+                        .clipShape(Circle())
+                    Text(friend.name)
+                        .font(.headline)
+                }
+            }
+            .navigationTitle("Friends")
+            .navigationBarItems(trailing: Button("Done") {
+                dismiss()
+            })
+        }
+    }
+}
+
+// MARK: - Social Post Profile View
 
 struct SocialPostProfile: View {
     let username: String
     let timeAgo: String
     let content: String
-    let likes: String
     let comments: String
-    
+    let postImage: String?
+    let profileImage: String
+
+    @State private var isLiked = false
+    @State private var likes: Int
+
+    init(username: String, timeAgo: String, content: String, likes: Int, comments: String, postImage: String? = "JaneDoePost", profileImage: String = "JaneDoe") {
+        self.username = username
+        self.timeAgo = timeAgo
+        self.content = content
+        self._likes = State(initialValue: likes)
+        self.comments = comments
+        self.postImage = postImage
+        self.profileImage = profileImage
+    }
+
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
+            // Header with profile image and username
             HStack(spacing: 12) {
-                Image("JaneDoe")
+                Image(profileImage)
                     .resizable()
                     .aspectRatio(contentMode: .fill)
                     .frame(width: 50, height: 50)
@@ -139,7 +200,7 @@ struct SocialPostProfile: View {
                         Circle().stroke(Color.white, lineWidth: 2)
                     )
                     .shadow(radius: 5)
-                
+
                 VStack(alignment: .leading) {
                     Text(username)
                         .font(.headline)
@@ -148,40 +209,55 @@ struct SocialPostProfile: View {
                         .foregroundColor(.gray)
                 }
             }
-            
+
             Text(content)
                 .padding(.vertical, 4)
-            
-            Image("JaneDoePost")
-                .resizable()
-                .aspectRatio(contentMode: .fill)
-                .frame(width: 350, height: 300)
-                .clipShape(Rectangle())
-                .overlay(
-                    Circle().stroke(Color.white, lineWidth: 2)
-                )
-            
+
+            if let postImage = postImage {
+                Image(postImage)
+                    .resizable()
+                    .aspectRatio(contentMode: .fill)
+                    .frame(maxWidth: .infinity)
+                    .frame(height: 250)
+                    .clipped()
+                    .overlay(
+                        Rectangle().stroke(Color.white, lineWidth: 2)
+                    )
+            }
+
             HStack(spacing: 30) {
-                Button(action: {}) {
+                // Like Button
+                Button(action: {
+                    isLiked.toggle()
+                    likes += isLiked ? 1 : -1
+                }) {
                     HStack {
-                        Image(systemName: "heart")
-                        Text(likes)
+                        Image(systemName: isLiked ? "heart.fill" : "heart")
+                            .foregroundColor(isLiked ? .red : .gray)
+                        Text("\(likes)")
                     }
                 }
-                
-                Button(action: {}) {
+
+                // Comments Button
+                Button(action: {
+                    // Handle comments action
+                }) {
                     HStack {
                         Image(systemName: "bubble.right")
                         Text(comments)
                     }
                 }
-                
+
                 Spacer()
-                
-                Button(action: {}) {
-                    Image(systemName: "square.and.arrow.up")
-                    Text("Share")
+
+                // Share Button
+                ShareLink(item: content) {
+                    HStack {
+                        Image(systemName: "square.and.arrow.up")
+                        Text("Share")
+                    }
                 }
+                .foregroundColor(.gray)
             }
             .foregroundColor(.gray)
         }
@@ -192,7 +268,23 @@ struct SocialPostProfile: View {
     }
 }
 
+struct ActivityView: UIViewControllerRepresentable {
+    let activityItems: [Any]
+    let applicationActivities: [UIActivity]? = nil
+
+    func makeUIViewController(context: Context) -> UIActivityViewController {
+        let controller = UIActivityViewController(
+            activityItems: activityItems,
+            applicationActivities: applicationActivities
+        )
+        return controller
+    }
+
+    func updateUIViewController(_ uiViewController: UIActivityViewController, context: Context) {}
+}
+
+// MARK: - Preview
+
 #Preview {
     ProfileView()
 }
-
