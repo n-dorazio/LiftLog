@@ -9,13 +9,28 @@ import SwiftUI
 import PhotosUI
 import CoreLocationUI
 
+
+struct Post: Identifiable {
+    let id = UUID() // Unique identifier for each post
+    let username: String
+    let timeAge: String
+    let profilePicture: String
+    let content: String
+}
+
 struct SocialView: View {
+    let posts = [
+        Post(username: "Jordan", timeAge: "2h ago", profilePicture: "jordan", content: "Just completed a great workout! 💪"),
+        Post(username: "Jane Doe", timeAge: "4h ago", profilePicture: "JaneDoe", content: "Loving my new fitness routine!"),
+        Post(username: "Christie", timeAge: "6h ago", profilePicture: "christie", content: "Feeling strong after today's session."),
+        Post(username: "Yousri", timeAge: "8h ago", profilePicture: "yousri", content: "Ran 5k this morning 🏃‍♀️!")
+     ]
     var body: some View {
         NavigationView {
             ScrollView {
                 VStack(spacing: 20) {
-                    ForEach(0..<5) { _ in
-                        SocialPost()
+                    ForEach(posts) { post in
+                        SocialPost(post: post)
                     }
                 }
                 .padding()
@@ -52,7 +67,6 @@ struct SocialView: View {
 
 
 
-
 // Define the Comment struct
 struct Comment: Identifiable {
     let id = UUID() // Unique identifier for each comment
@@ -62,6 +76,8 @@ struct Comment: Identifiable {
 }
 
 struct SocialPost: View {
+    let post: Post
+
     @State private var isLiked = false
     @State private var isCommenting = false
     @State private var commentText = ""
@@ -72,13 +88,22 @@ struct SocialPost: View {
         VStack(alignment: .leading, spacing: 12) {
             // User Info
             HStack {
-                Circle()
-                    .frame(width: 40, height: 40)
-                    .foregroundColor(.gray)
+                // Profile Picture
+                if let uiImage = UIImage(named: post.profilePicture) {
+                    Image(uiImage: uiImage)
+                        .resizable()
+                        .frame(width: 40, height: 40)
+                        .clipShape(Circle())
+                        .overlay(Circle().stroke(Color.gray, lineWidth: 1))
+                } else {
+                    Circle()
+                        .frame(width: 40, height: 40)
+                        .foregroundColor(.gray)
+                }
                 VStack(alignment: .leading) {
-                    Text("User Name")
+                    Text(post.username)
                         .font(.headline)
-                    Text("2h ago")
+                    Text("2h ago") // Placeholder timestamp
                         .font(.caption)
                         .foregroundColor(.gray)
                 }
@@ -86,7 +111,7 @@ struct SocialPost: View {
             }
             
             // Post Content
-            Text("Just completed a great workout! 💪")
+            Text(post.content)
             
             // Existing Comments
             if !comments.isEmpty {
@@ -454,5 +479,5 @@ struct ImagePicker: UIViewControllerRepresentable {
 
 
 #Preview {
-    ContentView()
+    SocialView()
 }
