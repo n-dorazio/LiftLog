@@ -9,7 +9,6 @@ import PhotosUI
 import CoreLocationUI
 
 
-
 struct Post: Identifiable {
     let id = UUID() // Unique identifier for each post
     let username: String
@@ -26,13 +25,16 @@ struct SocialView: View {
         Post(username: "Yousri", timeAge: "8h ago", profilePicture: "yousri", content: "Ran 5k this morning 🏃‍♀️!")
     ]
 
+  
     var body: some View {
         NavigationView {
             ScrollView {
                 VStack(spacing: 20) {
+
                     // Use ForEach to dynamically create posts
                     ForEach(posts) { post in
                         SocialPost(post: post) // Pass each post to SocialPost
+
                     }
                 }
                 .padding()
@@ -72,7 +74,6 @@ struct SocialView: View {
 
 
 
-
 // Define the Comment struct
 struct Comment: Identifiable {
     let id = UUID() // Unique identifier for each comment
@@ -104,6 +105,7 @@ struct SocialPost: View {
                         Text(post.timeAge) // Display the time ago
                             .font(.caption)
                             .foregroundColor(.gray)
+
                     }
                     Spacer()
                 }
@@ -486,5 +488,5 @@ struct ImagePicker: UIViewControllerRepresentable {
 
 
 #Preview {
-    ContentView()
+    SocialView()
 }

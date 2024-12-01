@@ -7,9 +7,14 @@
 
 import SwiftUI
 
+
 class UserProfileModel: ObservableObject {
     @Published var name: String = "Jane Doe"
-    @Published var bio: String = "I love cardio"
-    @Published var topRoutines: [String] = ["Chest Workout", "Cardio Warm-Up", "Leg Workout"]
-    @Published var profileImage: Image? = nil
+    @Published var bio: String = "Fitness enthusiast"
+    @Published var topRoutines: [String] = ["Leg Press", "Squats", "Pull-Ups"]
+//    @Published var friends: [Friends] = [
+//        Friends(name: "John Smith", image: "jordan"),
+//        Friends(name: "Alice Johnson", image: "kate"),
+//        Friends(name: "Christie", image: "christie"),
+//    ]
 }
