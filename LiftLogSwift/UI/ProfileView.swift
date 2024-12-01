@@ -54,7 +54,7 @@ struct PostDetailView: View {
     @State private var isLiked: Bool = false
 
     var body: some View {
-        VStack {
+        VStack(alignment: .leading) { // Set alignment to leading
             ScrollView {
                 // Post Content
                 VStack(alignment: .leading, spacing: 12) {
@@ -131,6 +131,7 @@ struct PostDetailView: View {
                 .cornerRadius(20)
                 .shadow(color: .gray.opacity(0.1), radius: 5)
                 .padding()
+                .frame(maxWidth: .infinity, alignment: .leading) // Ensure the content takes up full width
 
                 // Comments Section
                 VStack(alignment: .leading, spacing: 12) {
@@ -149,11 +150,14 @@ struct PostDetailView: View {
                                     .font(.subheadline)
                                     .foregroundColor(.black)
                             }
+                            Spacer() // Push content to the left
                         }
                         .padding(.vertical, 4)
+                        .frame(maxWidth: .infinity, alignment: .leading) // Ensure HStack takes up full width
                     }
                 }
                 .padding(.horizontal)
+                .frame(maxWidth: .infinity, alignment: .leading) // Ensure VStack takes up full width
             }
 
             // Comment Input Field
