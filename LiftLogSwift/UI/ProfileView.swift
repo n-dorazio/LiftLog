@@ -16,6 +16,175 @@ struct Friends: Identifiable {
     let image: String // Name of the image asset
 }
 
+struct Post: Identifiable {
+    let id = UUID()
+    let username: String
+    let timeAgo: String
+    let content: String
+    var likes: Int
+    var comments: [Comments]
+    let postImage: String?
+    let profileImage: String
+}
+
+struct Comments: Identifiable {
+    let id = UUID()
+    let username: String
+    let content: String
+    let profileImage: String
+}
+
+let post = Post(
+    username: "Jane Doe",
+    timeAgo: "2s ago",
+    content: "Hey Pookies! Just started using this amazing app called LiftLog. Now my fitness goals seem achievable!!",
+    likes: 121,
+    comments: [
+        Comments(username: "John Smith", content: "Great job!", profileImage: "jordan"),
+        Comments(username: "Alice Johnson", content: "Keep it up!", profileImage: "kate"),
+        Comments(username: "Bob Lee", content: "Inspirational!", profileImage: "yousri")
+    ],
+    postImage: "JaneDoePost",
+    profileImage: "JaneDoe"
+)
+
+struct PostDetailView: View {
+    @State var post: Post
+    @State private var newCommentText = ""
+    @State private var isLiked: Bool = false
+
+    var body: some View {
+        VStack {
+            ScrollView {
+                // Post Content
+                VStack(alignment: .leading, spacing: 12) {
+                    // Header with profile image and username
+                    HStack(spacing: 12) {
+                        Image(post.profileImage)
+                            .resizable()
+                            .aspectRatio(contentMode: .fill)
+                            .frame(width: 50, height: 50)
+                            .clipShape(Circle())
+                            .overlay(
+                                Circle().stroke(Color.white, lineWidth: 2)
+                            )
+                            .shadow(radius: 5)
+
+                        VStack(alignment: .leading) {
+                            Text(post.username)
+                                .font(.headline)
+                            Text(post.timeAgo)
+                                .font(.caption)
+                                .foregroundColor(.gray)
+                        }
+                    }
+
+                    Text(post.content)
+                        .padding(.vertical, 4)
+
+                    if let postImage = post.postImage {
+                        Image(postImage)
+                            .resizable()
+                            .aspectRatio(contentMode: .fill)
+                            .frame(maxWidth: .infinity)
+                            .frame(height: 250)
+                            .clipped()
+                            .overlay(
+                                Rectangle().stroke(Color.white, lineWidth: 2)
+                            )
+                    }
+
+                    HStack(spacing: 30) {
+                        // Like Button
+                        Button(action: {
+                            isLiked.toggle()
+                            post.likes += isLiked ? 1 : -1
+                        }) {
+                            HStack {
+                                Image(systemName: isLiked ? "heart.fill" : "heart")
+                                    .foregroundColor(isLiked ? .red : .gray)
+                                Text("\(post.likes)")
+                            }
+                        }
+
+                        // Comments Count
+                        HStack {
+                            Image(systemName: "bubble.right")
+                            Text("\(post.comments.count)")
+                        }
+
+                        Spacer()
+
+                        // Share Button
+                        ShareLink(item: post.content) {
+                            HStack {
+                                Image(systemName: "square.and.arrow.up")
+                                Text("Share")
+                            }
+                        }
+                        .foregroundColor(.gray)
+                    }
+                    .foregroundColor(.gray)
+                }
+                .padding()
+                .background(Color.white)
+                .cornerRadius(20)
+                .shadow(color: .gray.opacity(0.1), radius: 5)
+                .padding()
+
+                // Comments Section
+                VStack(alignment: .leading, spacing: 12) {
+                    ForEach(post.comments) { comment in
+                        HStack(alignment: .top, spacing: 12) {
+                            Image(comment.profileImage)
+                                .resizable()
+                                .aspectRatio(contentMode: .fill)
+                                .frame(width: 40, height: 40)
+                                .clipShape(Circle())
+
+                            VStack(alignment: .leading) {
+                                Text(comment.username)
+                                    .font(.headline)
+                                Text(comment.content)
+                                    .font(.subheadline)
+                                    .foregroundColor(.black)
+                            }
+                        }
+                        .padding(.vertical, 4)
+                    }
+                }
+                .padding(.horizontal)
+            }
+
+            // Comment Input Field
+            HStack {
+                Image("JaneDoe") // Replace with the current user's profile image
+                    .resizable()
+                    .aspectRatio(contentMode: .fill)
+                    .frame(width: 35, height: 35)
+                    .clipShape(Circle())
+
+                TextField("Add a comment...", text: $newCommentText)
+                    .textFieldStyle(RoundedBorderTextFieldStyle())
+
+                Button(action: {
+                    if !newCommentText.trimmingCharacters(in: .whitespaces).isEmpty {
+                        let newComment = Comments(username: "Jane Doe", content: newCommentText, profileImage: "JaneDoe")
+                        post.comments.append(newComment)
+                        newCommentText = ""
+                    }
+                }) {
+                    Text("Post")
+                        .bold()
+                }
+                .disabled(newCommentText.trimmingCharacters(in: .whitespaces).isEmpty)
+            }
+            .padding()
+            .background(Color.white)
+        }
+        .navigationBarTitle("Post", displayMode: .inline)
+    }
+}
 
 struct ProfileView: View {
     @Environment(\.presentationMode) var presentationMode
@@ -25,108 +194,114 @@ struct ProfileView: View {
     @StateObject private var userProfile = UserProfileModel()
 
     var body: some View {
-        ScrollView {
-            VStack(spacing: 24) {
-                // Profile Header
-                ZStack {
-                    Text(userProfile.name)
-                        .font(.title2)
-                        .bold()
-                    HStack {
-                        Spacer()
-                        Button(action: {
-                            showSettings = true
-                        }) {
-                            Image(systemName: "gearshape")
-                                .font(.title2)
+        NavigationView {
+            ScrollView {
+                VStack(spacing: 24) {
+                    // Profile Header
+                    ZStack {
+                        Text(userProfile.name)
+                            .font(.title2)
+                            .bold()
+                        HStack {
+                            Spacer()
+                            Button(action: {
+                                showSettings = true
+                            }) {
+                                Image(systemName: "gearshape")
+                                    .font(.title2)
+                            }
                         }
                     }
-                }
-                .padding(.horizontal)
-                
-                // Profile Image and Stats
-                VStack(spacing: 20) {
-                    Image("JaneDoe")
-                        .resizable()
-                        .aspectRatio(contentMode: .fill)
-                        .frame(width: 100, height: 100)
-                        .clipShape(Circle())
-                        .overlay(
-                            Circle().stroke(Color.white, lineWidth: 2)
-                        )
-                        .shadow(radius: 5)
+                    .padding(.horizontal)
                     
-                    HStack(spacing: 40) {
-                        VStack {
-                            Text("2")
-                                .font(.title2)
-                                .bold()
-                            Text("Posts")
-                                .foregroundColor(.gray)
-                        }
+                    // Profile Image and Stats
+                    VStack(spacing: 20) {
+                        Image("JaneDoe")
+                            .resizable()
+                            .aspectRatio(contentMode: .fill)
+                            .frame(width: 100, height: 100)
+                            .clipShape(Circle())
+                            .overlay(
+                                Circle().stroke(Color.white, lineWidth: 2)
+                            )
+                            .shadow(radius: 5)
                         
-                        // Friends Count as Button
-                        Button(action: {
-                            showFriendsList = true
-                        }) {
+                        HStack(spacing: 40) {
                             VStack {
-                                Text("\(userProfile.friends.count)")
+                                Text("2")
                                     .font(.title2)
                                     .bold()
-                                Text("Friends")
+                                Text("Posts")
                                     .foregroundColor(.gray)
+                            }
+                            
+                            // Friends Count as Button
+                            Button(action: {
+                                showFriendsList = true
+                            }) {
+                                VStack {
+                                    Text("\(userProfile.friends.count)")
+                                        .font(.title2)
+                                        .bold()
+                                    Text("Friends")
+                                        .foregroundColor(.gray)
+                                }
+                            }
+                            
+                            Button(action: {
+                                showAddFriends = true
+                            }) {
+                                Image(systemName: "person.badge.plus")
+                                    .font(.title2)
+                                    .foregroundColor(.black)
                             }
                         }
                         
-                        Button(action: {
-                            showAddFriends = true
-                        }) {
-                            Image(systemName: "person.badge.plus")
-                                .font(.title2)
-                                .foregroundColor(.black)
-                        }
+                        Text(userProfile.bio)
+                            .foregroundColor(.gray)
                     }
                     
-                    Text(userProfile.bio)
-                        .foregroundColor(.gray)
-                }
-                
-                // Top Routines
-                VStack(alignment: .leading, spacing: 16) {
-                    Text("Top Routines")
-                        .font(.title3)
-                        .bold()
-                    
-                    HStack(spacing: 12) {
-                        ForEach(userProfile.topRoutines, id: \.self) { routine in
-                            Text(routine)
-                                .padding(.horizontal, 16)
-                                .padding(.vertical, 8)
-                                .background(
-                                    LinearGradient(colors: [.orange, .red],
-                                                 startPoint: .leading,
-                                                 endPoint: .trailing)
-                                )
-                                .foregroundColor(.white)
-                                .cornerRadius(20)
+                    // Top Routines
+                    VStack(alignment: .leading, spacing: 16) {
+                        Text("Top Routines")
+                            .font(.title3)
+                            .bold()
+                        
+                        HStack(spacing: 12) {
+                            ForEach(userProfile.topRoutines, id: \.self) { routine in
+                                Text(routine)
+                                    .padding(.horizontal, 16)
+                                    .padding(.vertical, 8)
+                                    .background(
+                                        LinearGradient(colors: [.orange, .red],
+                                                       startPoint: .leading,
+                                                       endPoint: .trailing)
+                                    )
+                                    .foregroundColor(.white)
+                                    .cornerRadius(20)
+                            }
                         }
                     }
+                    .padding(.horizontal)
+                    
+                    // Posts
+                    VStack(spacing: 16) {
+                        NavigationLink(destination: PostDetailView(post: post)) {
+                            SocialPostProfile(
+                                username: "Jane Doe",
+                                timeAgo: "2s ago",
+                                content: "Hey Pookies! Just started using this amazing app called LiftLog. Now my fitness goals seem achievable!!",
+                                likes: 121,
+//                                comments: ["Great job!", "Keep it up!", "Inspirational!"],
+                                postImage: "JaneDoePost",
+                                profileImage: "JaneDoe"
+                            )
+                        }
+                        .buttonStyle(PlainButtonStyle()) // Remove the default NavigationLink styling
+                    }
+                    .padding(.horizontal)
                 }
-                .padding(.horizontal)
-                
-                // Posts
-                VStack(spacing: 16) {
-                    SocialPostProfile(
-                        username: "Jane Doe",
-                        timeAgo: "2s ago",
-                        content: "Hey Pookies! Just started using this amazing app called LiftLog. Now my fitness goals seem achievable!!",
-                        likes: 121,
-                        comments: "34"
-                    )
-                }
-                .padding(.horizontal)
-            }
-        }
+            }}
         .sheet(isPresented: $showSettings) {
             SettingsView(userProfile: userProfile)
         }
@@ -164,28 +339,54 @@ struct FriendsListView: View {
     }
 }
 
-// MARK: - Social Post Profile View
+struct CommentSheet: View {
+    @Environment(\.dismiss) var dismiss
+    @Binding var comments: [String]
+    @State private var newCommentText = ""
 
+    var body: some View {
+        NavigationView {
+            VStack {
+                List {
+                    ForEach(comments, id: \.self) { comment in
+                        Text(comment)
+                    }
+                }
+
+                Divider()
+
+                HStack {
+                    TextField("Add a comment...", text: $newCommentText)
+                        .textFieldStyle(RoundedBorderTextFieldStyle())
+                    Button(action: {
+                        if !newCommentText.trimmingCharacters(in: .whitespaces).isEmpty {
+                            comments.append(newCommentText)
+                            newCommentText = ""
+                        }
+                    }) {
+                        Text("Post")
+                            .bold()
+                    }
+                    .disabled(newCommentText.trimmingCharacters(in: .whitespaces).isEmpty)
+                }
+                .padding()
+            }
+            .navigationTitle("Comments")
+            .navigationBarItems(trailing: Button("Done") {
+                dismiss()
+            })
+        }
+    }
+}
 struct SocialPostProfile: View {
     let username: String
     let timeAgo: String
     let content: String
-    let comments: String
+    let likes: Int
     let postImage: String?
     let profileImage: String
 
     @State private var isLiked = false
-    @State private var likes: Int
-
-    init(username: String, timeAgo: String, content: String, likes: Int, comments: String, postImage: String? = "JaneDoePost", profileImage: String = "JaneDoe") {
-        self.username = username
-        self.timeAgo = timeAgo
-        self.content = content
-        self._likes = State(initialValue: likes)
-        self.comments = comments
-        self.postImage = postImage
-        self.profileImage = profileImage
-    }
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
@@ -229,22 +430,12 @@ struct SocialPostProfile: View {
                 // Like Button
                 Button(action: {
                     isLiked.toggle()
-                    likes += isLiked ? 1 : -1
+                    // Handle like action if needed
                 }) {
                     HStack {
                         Image(systemName: isLiked ? "heart.fill" : "heart")
                             .foregroundColor(isLiked ? .red : .gray)
                         Text("\(likes)")
-                    }
-                }
-
-                // Comments Button
-                Button(action: {
-                    // Handle comments action
-                }) {
-                    HStack {
-                        Image(systemName: "bubble.right")
-                        Text(comments)
                     }
                 }
 
