@@ -16,7 +16,7 @@ struct Friends: Identifiable {
     let image: String // Name of the image asset
 }
 
-struct Post: Identifiable {
+struct posts: Identifiable {
     let id = UUID()
     let username: String
     let timeAgo: String
@@ -34,7 +34,7 @@ struct Comments: Identifiable {
     let profileImage: String
 }
 
-let post = Post(
+let post = posts(
     username: "Jane Doe",
     timeAgo: "2s ago",
     content: "Hey Pookies! Just started using this amazing app called LiftLog. Now my fitness goals seem achievable!!",
@@ -49,7 +49,7 @@ let post = Post(
 )
 
 struct PostDetailView: View {
-    @State var post: Post
+    @State var post: posts
     @State private var newCommentText = ""
     @State private var isLiked: Bool = false
 
