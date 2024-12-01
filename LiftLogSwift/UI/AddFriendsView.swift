@@ -18,6 +18,15 @@ struct AddFriendsView: View {
         Friend(name: "Christine Gonzales", image: "christie")
     ]
     
+    // Computed property to filter friends based on searchText
+    var filteredFriends: [Friend] {
+        if searchText.isEmpty {
+            return suggestedFriends
+        } else {
+            return suggestedFriends.filter { $0.name.lowercased().contains(searchText.lowercased()) }
+        }
+    }
+    
     var body: some View {
         NavigationView {
             VStack(spacing: 20) {
@@ -26,7 +35,11 @@ struct AddFriendsView: View {
                     Image(systemName: "magnifyingglass")
                         .foregroundColor(.gray)
                     TextField("Search for People", text: $searchText)
-                    Button(action: {}) {
+                        .autocapitalization(.none)
+                        .disableAutocorrection(true)
+                    Button(action: {
+                        // Optionally handle filter options
+                    }) {
                         Image(systemName: "slider.horizontal.3")
                             .foregroundColor(.gray)
                     }
@@ -39,7 +52,7 @@ struct AddFriendsView: View {
                 // Suggested Friends List
                 ScrollView {
                     VStack(spacing: 12) {
-                        ForEach(suggestedFriends) { friend in
+                        ForEach(filteredFriends) { friend in
                             HStack {
                                 Image(friend.image)
                                     .resizable()
@@ -55,7 +68,9 @@ struct AddFriendsView: View {
                                 
                                 Spacer()
                                 
-                                Button(action: {}) {
+                                Button(action: {
+                                    // Handle add friend action
+                                }) {
                                     Image(systemName: "plus.circle")
                                         .font(.title2)
                                         .foregroundColor(.black)
