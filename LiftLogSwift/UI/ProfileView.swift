@@ -186,6 +186,7 @@ struct PostDetailView: View {
     }
 }
 
+
 struct ProfileView: View {
     @Environment(\.presentationMode) var presentationMode
     @State private var showSettings = false
@@ -243,6 +244,7 @@ struct ProfileView: View {
                                     Text("\(userProfile.friends.count)")
                                         .font(.title2)
                                         .bold()
+                                        .foregroundColor(.black)
                                     Text("Friends")
                                         .foregroundColor(.gray)
                                 }
@@ -288,20 +290,22 @@ struct ProfileView: View {
                     VStack(spacing: 16) {
                         NavigationLink(destination: PostDetailView(post: post)) {
                             SocialPostProfile(
-                                username: "Jane Doe",
-                                timeAgo: "2s ago",
-                                content: "Hey Pookies! Just started using this amazing app called LiftLog. Now my fitness goals seem achievable!!",
-                                likes: 121,
-//                                comments: ["Great job!", "Keep it up!", "Inspirational!"],
-                                postImage: "JaneDoePost",
-                                profileImage: "JaneDoe"
+                                username: post.username,
+                                timeAgo: post.timeAgo,
+                                content: post.content,
+                                likes: post.likes,
+                                commentsCount: post.comments.count, // Pass comments count
+                                postImage: post.postImage,
+                                profileImage: post.profileImage
                             )
                         }
+                        .buttonStyle(PlainButtonStyle())
+                    }
                         .buttonStyle(PlainButtonStyle()) // Remove the default NavigationLink styling
                     }
                     .padding(.horizontal)
                 }
-            }}
+            }
         .sheet(isPresented: $showSettings) {
             SettingsView(userProfile: userProfile)
         }
@@ -383,6 +387,7 @@ struct SocialPostProfile: View {
     let timeAgo: String
     let content: String
     let likes: Int
+    let commentsCount: Int
     let postImage: String?
     let profileImage: String
 
@@ -436,6 +441,16 @@ struct SocialPostProfile: View {
                         Image(systemName: isLiked ? "heart.fill" : "heart")
                             .foregroundColor(isLiked ? .red : .gray)
                         Text("\(likes)")
+                    }
+                }
+
+                // Comment Button
+                Button(action: {
+                    // Handle comment button action if needed
+                }) {
+                    HStack {
+                        Image(systemName: "bubble.right")
+                        Text("\(commentsCount)")
                     }
                 }
 
