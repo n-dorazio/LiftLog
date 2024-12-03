@@ -15,28 +15,33 @@ struct WorkoutView: View {
     
     var body: some View {
         NavigationView {
-            ScrollView {
-                VStack(spacing: 16) {
-                    ForEach(routineStore.routines) { routine in
-                        Button(action: {
-                            selectedRoutine = routine
-                        }) {
-                            HStack {
-                                Text(routine.name)
-                                    .font(.title3)
-                                    .foregroundColor(.black)
-                                Spacer()
-                            }
-                            .padding()
-                            .background(
-                                RoundedRectangle(cornerRadius: 15)
-                                    .fill(Color.gray.opacity(0.1))
-                            )
+            List {
+                ForEach(routineStore.routines) { routine in
+                    Button(action: {
+                        selectedRoutine = routine
+                    }) {
+                        HStack {
+                            Text(routine.name)
+                                .font(.title3)
+                                .foregroundColor(.black)
+                            Spacer()
+                        }
+                        .padding()
+                        .background(
+                            RoundedRectangle(cornerRadius: 15)
+                                .fill(Color.gray.opacity(0.1))
+                        )
+                    }
+                    .swipeActions(edge: .trailing, allowsFullSwipe: true) {
+                        Button(role: .destructive) {
+                            routineStore.deleteRoutine(id: routine.id)
+                        } label: {
+                            Label("Delete", systemImage: "trash")
                         }
                     }
                 }
-                .padding()
             }
+            .listStyle(PlainListStyle())
             .navigationTitle("Workout Routines")
             .navigationBarItems(
                 trailing: Button(action: {
@@ -59,7 +64,9 @@ struct WorkoutView: View {
 
     private func binding(for routine: Routine) -> Binding<Routine> {
         Binding(
-            get: { routine },
+            get: { 
+                routineStore.routines.first(where: { $0.id == routine.id }) ?? routine
+            },
             set: { newValue in
                 if let index = routineStore.routines.firstIndex(where: { $0.id == routine.id }) {
                     routineStore.routines[index] = newValue

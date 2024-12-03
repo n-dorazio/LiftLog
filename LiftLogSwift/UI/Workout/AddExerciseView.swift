@@ -123,7 +123,6 @@ struct AddExerciseView: View {
                                 duration: duration.isEmpty ? "15 Mins" : duration,
                                 icon: selectedIcon
                             )
-                            routine.exercises.append(newExercise)
                             routineStore.addExercise(to: routine.id, exercise: newExercise)
                             presentationMode.wrappedValue.dismiss()
                         }

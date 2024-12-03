@@ -10,14 +10,26 @@ import Combine
 
 struct WorkoutSessionView: View {
     let routine: Routine
-    let exercise: Exercise
+    let initialExerciseIndex: Int
+    @State private var currentExerciseIndex: Int
     @Environment(\.presentationMode) var presentationMode
     @State private var timeRemaining = 5
-    @State private var isCountingDown = true
+    @State private var isCountingDown = false
+    @State private var showStartPrompt = true
     @State private var sets: [Set] = [Set(reps: "", weight: "")]
     @State private var showSkipAlert = false
     @State private var elapsedTime = 0
     @State private var isPaused = false
+    
+    init(routine: Routine, initialExerciseIndex: Int = 0) {
+        self.routine = routine
+        self.initialExerciseIndex = initialExerciseIndex
+        _currentExerciseIndex = State(initialValue: initialExerciseIndex)
+    }
+    
+    var currentExercise: Exercise {
+        routine.exercises[currentExerciseIndex]
+    }
     
     let timer = Timer.publish(every: 1, on: .main, in: .common).autoconnect()
     
@@ -32,7 +44,52 @@ struct WorkoutSessionView: View {
             Color.white.ignoresSafeArea()
             
             VStack {
-                if isCountingDown {
+                if showStartPrompt {
+                    VStack(spacing: 20) {
+                        Text(currentExercise.name)
+                            .font(.title)
+                            .bold()
+                        
+                        Image(systemName: currentExercise.icon)
+                            .font(.system(size: 100))
+                            .padding(.top, 30)
+                        
+                        VStack(alignment: .leading, spacing: 10) {
+                            HStack {
+                                Image(systemName: "clock")
+                                Text(currentExercise.duration)
+                            }
+                            HStack {
+                                Image(systemName: "flame")
+                                Text(currentExercise.calories)
+                            }
+                        }
+                        .padding(.top, 30)
+                        
+                        Spacer()
+                        
+                        Button(action: {
+                            showStartPrompt = false
+                            isCountingDown = true
+                        }) {
+                            Text("Begin Exercise")
+                                .font(.headline)
+                                .bold()
+                                .frame(maxWidth: .infinity)
+                                .padding()
+                                .background(
+                                    LinearGradient(
+                                        gradient: Gradient(colors: [.red, .orange]),
+                                        startPoint: .leading,
+                                        endPoint: .trailing
+                                    )
+                                )
+                                .foregroundColor(.white)
+                                .cornerRadius(20)
+                        }
+                        .padding(.horizontal)
+                    }
+                } else if isCountingDown {
                     // Countdown View
                     VStack(spacing: 20) {
                         Text("GET READY!")
@@ -41,22 +98,22 @@ struct WorkoutSessionView: View {
                         Text("\(timeRemaining)")
                             .font(.system(size: 80, weight: .bold))
                         
-                        Text(exercise.name)
+                        Text(currentExercise.name)
                             .font(.title)
                             .bold()
                         
-                        Image(systemName: exercise.icon)
+                        Image(systemName: currentExercise.icon)
                             .font(.system(size: 100))
                             .padding(.top, 30)
                         
                         VStack(alignment: .leading, spacing: 10) {
                             HStack {
                                 Image(systemName: "clock")
-                                Text("\(exercise.duration)")
+                                Text("\(currentExercise.duration)")
                             }
                             HStack {
                                 Image(systemName: "flame")
-                                Text("\(exercise.calories)")
+                                Text("\(currentExercise.calories)")
                             }
                             HStack {
                                 Image(systemName: "figure.run")
@@ -67,7 +124,7 @@ struct WorkoutSessionView: View {
                     }
                 } else {
                     VStack(spacing: 20) {
-                        Text(exercise.name)
+                        Text(currentExercise.name)
                             .font(.title)
                             .bold()
                         
@@ -172,25 +229,27 @@ struct WorkoutSessionView: View {
                         
                         Spacer()
                         
-                        Button(action: {
-                            showSkipAlert = true
-                        }) {
-                            Text("Skip")
-                                .font(.headline)
-                                .bold()
-                                .frame(maxWidth: .infinity)
-                                .padding()
-                                .background(
-                                    LinearGradient(
-                                        gradient: Gradient(colors: [.red, .orange]),
-                                        startPoint: .leading,
-                                        endPoint: .trailing
+                        if currentExerciseIndex < routine.exercises.count - 1 {
+                            Button(action: {
+                                showSkipAlert = true
+                            }) {
+                                Text("Next Exercise")
+                                    .font(.headline)
+                                    .bold()
+                                    .frame(maxWidth: .infinity)
+                                    .padding()
+                                    .background(
+                                        LinearGradient(
+                                            gradient: Gradient(colors: [.red, .orange]),
+                                            startPoint: .leading,
+                                            endPoint: .trailing
+                                        )
                                     )
-                                )
-                                .foregroundColor(.white)
-                                .cornerRadius(20)
+                                    .foregroundColor(.white)
+                                    .cornerRadius(20)
+                            }
+                            .padding(.horizontal)
                         }
-                        .padding(.horizontal)
                         
                         Button(action: {
                             presentationMode.wrappedValue.dismiss()
@@ -217,15 +276,25 @@ struct WorkoutSessionView: View {
         }
         .sheet(isPresented: $showSkipAlert) {
             VStack(spacing: 20) {
-                Text("Skip Exercise?")
+                Text("Move to Next Exercise?")
                     .font(.title2)
                     .bold()
                 
                 Button(action: {
-                    presentationMode.wrappedValue.dismiss()
+                    if currentExerciseIndex < routine.exercises.count - 1 {
+                        currentExerciseIndex += 1
+                        timeRemaining = 5
+                        showStartPrompt = true
+                        isCountingDown = false
+                        sets = [Set(reps: "", weight: "")]
+                        elapsedTime = 0
+                        isPaused = false
+                    } else {
+                        presentationMode.wrappedValue.dismiss()
+                    }
                     showSkipAlert = false
                 }) {
-                    Text("Confirm")
+                    Text(currentExerciseIndex < routine.exercises.count - 1 ? "Next Exercise" : "Finish Workout")
                         .font(.headline)
                         .bold()
                         .frame(maxWidth: .infinity)
