@@ -12,9 +12,9 @@ class UserProfileModel: ObservableObject {
     @Published var bio: String = "Fitness enthusiast and cardio lover"
     @Published var topRoutines: [String] = ["Pull-ups", "Sit-ups", "Squats"]
     @Published var profileImage: Image? = nil
-    @Published var friends: [Friends] = [
-        Friends(name: "John Smith", image: "jordan"),
-        Friends(name: "Alice Johnson", image: "kate"),
-        Friends(name: "Christie", image: "christie"),
+    @Published var friends: [Friend] = [
+        Friend(id:"John Smith" , name: "John Smith", image: "jordan"),
+        Friend(id:"Alice Johnson", name: "Alice Johnson", image: "kate"),
+        Friend(id:"Christie", name: "Christie", image: "christie"),
     ]
 }

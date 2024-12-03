@@ -10,11 +10,6 @@ import UIKit
 
 // MARK: - User Profile Model
 
-struct Friends: Identifiable {
-    let id = UUID()
-    let name: String
-    let image: String // Name of the image asset
-}
 
 struct posts: Identifiable {
     let id = UUID()
@@ -314,7 +309,7 @@ struct ProfileView: View {
             SettingsView(userProfile: userProfile)
         }
         .sheet(isPresented: $showAddFriends) {
-            AddFriendsView()
+            AddFriendsView(friends: $userProfile.friends)
         }
         .sheet(isPresented: $showFriendsList) {
             FriendsListView(friends: userProfile.friends)
@@ -323,7 +318,7 @@ struct ProfileView: View {
 }
 
 struct FriendsListView: View {
-    let friends: [Friends]
+    let friends: [Friend]
     @Environment(\.dismiss) var dismiss
 
     var body: some View {

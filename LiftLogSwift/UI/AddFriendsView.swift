@@ -9,13 +9,14 @@ import SwiftUI
 
 struct AddFriendsView: View {
     @Environment(\.presentationMode) var presentationMode
+    @Binding var friends: [Friend] // Binding to the user's friends list
     @State private var searchText = ""
     
     let suggestedFriends = [
-        Friend(name: "Yousri", image: "yousri"),
-        Friend(name: "Kate", image: "kate"),
-        Friend(name: "Jordan", image: "jordan"),
-        Friend(name: "Christine Gonzales", image: "christie")
+        Friend(id: "Yousri", name: "Yousri", image: "yousri"),
+        Friend(id: "Kate", name: "Kate", image: "kate"),
+        Friend(id: "Jordan", name: "Jordan", image: "jordan"),
+        Friend(id: "Christine Gonzales", name: "Christine Gonzales", image: "christie")
     ]
     
     // Computed property to filter friends based on searchText
@@ -62,19 +63,36 @@ struct AddFriendsView: View {
                                     .overlay(
                                         Circle().stroke(Color.white, lineWidth: 2)
                                     )
-
+                                
                                 Text(friend.name)
                                     .font(.title3)
                                 
                                 Spacer()
                                 
                                 Button(action: {
-                                    // Handle add friend action
+                                    // Add friend to the user's friends list
+                                    if !friends.contains(where: { $0.id == friend.id }) {
+                                        friends.append(friend)
+                                    }
                                 }) {
-                                    Image(systemName: "plus.circle")
-                                        .font(.title2)
-                                        .foregroundColor(.black)
+                                    if friends.contains(where: { $0.id == friend.id }) {
+                                        // Friend has been added
+                                        HStack {
+                                            Image(systemName: "checkmark.circle.fill")
+                                                .font(.title2)
+                                                .foregroundColor(.green)
+                                            Text("Added")
+                                                .font(.subheadline)
+                                                .foregroundColor(.green)
+                                        }
+                                    } else {
+                                        // Friend has not been added yet
+                                        Image(systemName: "plus.circle")
+                                            .font(.title2)
+                                            .foregroundColor(.black)
+                                    }
                                 }
+                                .disabled(friends.contains(where: { $0.id == friend.id }))
                             }
                             .padding()
                             .background(Color.white)
@@ -99,12 +117,23 @@ struct AddFriendsView: View {
     }
 }
 
-struct Friend: Identifiable {
-    let id = UUID()
+struct Friend: Identifiable, Equatable {
+    let id: String
     let name: String
     let image: String
 }
 
-#Preview {
-    AddFriendsView()
+// Updated Preview
+struct AddFriendsView_Previews: PreviewProvider {
+    static var previews: some View {
+        AddFriendsPreviewWrapper()
+    }
+}
+
+struct AddFriendsPreviewWrapper: View {
+    @State var friends = [Friend]()
+    
+    var body: some View {
+        AddFriendsView(friends: $friends)
+    }
 }
