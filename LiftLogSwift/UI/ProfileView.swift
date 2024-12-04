@@ -7,29 +7,31 @@
 
 import SwiftUI
 import UIKit
+import Foundation
 
 // MARK: - User Profile Model
 
 
-struct posts: Identifiable {
+struct ExistingPosts: Identifiable, Codable {
     let id = UUID()
     let username: String
     let timeAgo: String
     let content: String
     var likes: Int
+    var isLiked: Bool = false
     var comments: [Comments]
     let postImage: String?
     let profileImage: String
 }
 
-struct Comments: Identifiable {
+struct Comments: Identifiable, Codable {
     let id = UUID()
     let username: String
     let content: String
     let profileImage: String
 }
 
-let post = posts(
+let post = ExistingPosts(
     username: "Jane Doe",
     timeAgo: "2s ago",
     content: "Hey Pookies! Just started using this amazing app called LiftLog. Now my fitness goals seem achievable!!",
@@ -44,7 +46,7 @@ let post = posts(
 )
 
 struct PostDetailView: View {
-    @State var post: posts
+    @State var post: ExistingPosts
     @State private var newCommentText = ""
     @State private var isLiked: Bool = false
 
