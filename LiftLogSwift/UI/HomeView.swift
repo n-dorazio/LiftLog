@@ -60,15 +60,24 @@ struct HomeView: View {
                         
                         // Calories Card
                         VStack(spacing: 16) {
-                            Text("1,883 Kcal")
-                                .font(.system(size: 40, weight: .bold))
+                            
                             Text("Total Kilocalories")
                                 .foregroundColor(.gray)
+                            HStack {
+                                Text("1,883")
+                                    .font(.system(size: 40, weight: .bold))
+                                Text("/ 2,500 Kcal")
+                                    .font(.system(size: 16, weight: .medium))
+                                    .foregroundColor(.gray)
+                                
+                                
+                            }
+                            
                             
                             // Progress bars
                             HStack(spacing: 30) {
                                 VStack(alignment: .leading) {
-                                    Text("7580 m")
+                                    Text("7.5 km")
                                         .font(.title3)
                                         .fontWeight(.semibold)
                                     Text("Distance")
@@ -77,9 +86,14 @@ struct HomeView: View {
                                 }
                                 
                                 VStack(alignment: .leading) {
-                                    Text("9832")
-                                        .font(.title3)
-                                        .fontWeight(.semibold)
+                                    HStack {
+                                        Text("9832")
+                                            .font(.title3)
+                                            .fontWeight(.semibold)
+                                        Text("/ 10,000")
+                                            .font(.system(size: 12, weight: .medium))
+                                            .foregroundColor(.gray)
+                                    }
                                     Text("Steps")
                                         .font(.subheadline)
                                         .foregroundColor(.gray)
@@ -101,9 +115,9 @@ struct HomeView: View {
                         }
                         // Exercise Cards
                         HStack(spacing: 15) {
-                            ExerciseCard(icon: "dumbbell.fill", calories: "628", title: "Dumbbell")
-                            ExerciseCard(icon: "figure.walk", calories: "235", title: "Treadmill")
-                            ExerciseCard(icon: "figure.jumprope", calories: "432", title: "Rope")
+                            ExerciseCard(icon: "dumbbell.fill", calories: "70 lbs", title: "Dumbbell")
+                            ExerciseCard(icon: "figure.walk", calories: "235 Kcal", title: "Treadmill")
+                            ExerciseCard(icon: "figure.jumprope", calories: "432 Kcal", title: "Rope")
                         }
                         .padding(.horizontal)
                         
@@ -123,22 +137,6 @@ struct HomeView: View {
                     .padding(.vertical)
                 }
                 .background(Color.gray.opacity(0.05))
-                
-                // Details Modal
-                if showDetailsModal {
-                    DetailsModalView(showDetailsModal: $showDetailsModal)
-                        .padding()
-                        .transition(.scale(scale: 0.95))
-                        .background(
-                            Color.black.opacity(0.3)
-                                .edgesIgnoringSafeArea(.all)
-                                .onTapGesture {
-                                    withAnimation {
-                                        showDetailsModal.toggle()
-                                    }
-                                }
-                        )
-                }
                 
                 
                 // Calendar Popup
@@ -175,61 +173,6 @@ struct HomeView: View {
 }
 
 
-// New View for Details Modal
-struct DetailsModalView: View {
-    @Binding var showDetailsModal: Bool
-    
-    var body: some View {
-        VStack(spacing: 20) {
-            // Close Button
-            HStack {
-                Spacer()
-                Button(action: {
-                    withAnimation {
-                        showDetailsModal.toggle()
-                    }
-                }) {
-                    Image(systemName: "xmark.circle.fill")
-                        .font(.title)
-                        .foregroundColor(.gray)
-                        .padding()
-                }
-            }
-            
-            // Modal Content
-            Text("Daily Details")
-                .font(.title)
-                .fontWeight(.bold)
-            
-            VStack(alignment: .leading, spacing: 16) {
-                Text("Calories: 1,883 out of 2,500 kcal")
-                    .font(.headline)
-                Text("Distance: 7.5 km")
-                    .font(.headline)
-                Text("Steps: 9,832 out of 10,000")
-                    .font(.headline)
-            }
-            .padding()
-            .frame(maxWidth: .infinity)
-            .background(
-                RoundedRectangle(cornerRadius: 20)
-                    .fill(Color.white)
-                    .shadow(color: .gray.opacity(0.2), radius: 5)
-            )
-            
-            Spacer()
-        }
-        .padding()
-        .frame(maxWidth: .infinity)
-        .frame(height:400)
-        .background(Color.white)
-        .cornerRadius(20)
-//        .shadow(radius: 10)
-    }
-}
-
-
-
 struct CalendarView: View {
     @Binding var selectedDate: Date
     var onClose: (() -> Void)? // Closure to handle the close action
@@ -239,7 +182,7 @@ struct CalendarView: View {
             // Header with close button
             HStack {
                 Text("Select a Date")
-                    .font(.title2)
+                    .font(.system(size: 25, weight: .bold))
                     .padding()
                 
                 Spacer()
@@ -286,8 +229,6 @@ struct CalendarView: View {
 
 
 
-
-
 struct ExerciseCard: View {
     let icon: String
     let calories: String
@@ -304,7 +245,8 @@ struct ExerciseCard: View {
                         .fill(LinearGradient(colors: [.orange, .red], startPoint: .topLeading, endPoint: .bottomTrailing))
                 )
             
-            Text("\(calories) Kcal")
+//            Text("\(calories) Kcal")
+            Text("\(calories)")
                 .fontWeight(.semibold)
             Text(title)
                 .font(.caption)
