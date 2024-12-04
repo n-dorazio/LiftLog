@@ -164,8 +164,8 @@ struct SocialPost: View {
                             onPost: { commentText in
                                 // Add a new comment dynamically
                                 let newComment = Comment(
-                                    username: "Current User",
-                                    profilePicture: "profile_placeholder", // Replace with actual profile picture
+                                    username: "Jane Doe",
+                                    profilePicture: "JaneDoe", // Replace with actual profile picture
                                     text: commentText
                                 )
                                 comments.append(newComment) // Append the comment
@@ -331,7 +331,7 @@ struct ChatView: View {
         messages.append(userMessage)
 
         // Auto-reply logic
-        if newMessage.lowercased() == "hi" {
+        if newMessage.lowercased() == "hi"{
             DispatchQueue.main.asyncAfter(deadline: .now() + 1) { // Delay to simulate typing
                 let reply = Message(sender: friend.username, content: "Hi, how are you?", isCurrentUser: false)
                 messages.append(reply)
@@ -407,22 +407,22 @@ struct CreatePostView: View {
                     }
 
                     // Modern Image Upload Button
-                    Button(action: {
-                        showingImagePicker = true
-                    }) {
-                        HStack {
-                            Image(systemName: "photo.on.rectangle")
-                                .font(.system(size: 18))
-                            Text("Add Image")
-                                .font(.headline)
-                        }
-                        .padding()
-                        .frame(maxWidth: .infinity)
-                        .background(Color.blue)
-                        .foregroundColor(.white)
-                        .cornerRadius(10)
-                        .padding(.horizontal)
-                    }
+                  //  Button(action: {
+                  //      showingImagePicker = true
+                  //  }) {
+                  //      HStack {
+                  //          Image(systemName: "photo.on.rectangle")
+                  //              .font(.system(size: 18))
+                  //          Text("Add Image")
+                  //              .font(.headline)
+                  //      }
+                  //      .padding()
+                  //      .frame(maxWidth: .infinity)
+                  //      .background(Color.blue)
+                  //      .foregroundColor(.white)
+                   //     .cornerRadius(10)
+                    //    .padding(.horizontal)
+                   // }
                 }
                 .padding(.vertical)
 
@@ -502,9 +502,6 @@ struct ImagePicker: UIViewControllerRepresentable {
         }
     }
 }
-
-
-
 
 
 
