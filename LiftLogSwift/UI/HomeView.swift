@@ -10,6 +10,7 @@ import SwiftUI
 
 struct HomeView: View {
     @State private var showCalendar = false
+    @State private var showDetailsModal = false
     @State private var selectedDate = Date()
     
     var body: some View {
@@ -93,7 +94,11 @@ struct HomeView: View {
                                 .shadow(color: .gray.opacity(0.1), radius: 10)
                         )
                         .padding(.horizontal)
-                        
+                        .onTapGesture { // Tap gesture to trigger modal
+                                withAnimation {
+                                showDetailsModal.toggle()
+                            }
+                        }
                         // Exercise Cards
                         HStack(spacing: 15) {
                             ExerciseCard(icon: "dumbbell.fill", calories: "628", title: "Dumbbell")
@@ -118,6 +123,23 @@ struct HomeView: View {
                     .padding(.vertical)
                 }
                 .background(Color.gray.opacity(0.05))
+                
+                // Details Modal
+                if showDetailsModal {
+                    DetailsModalView(showDetailsModal: $showDetailsModal)
+                        .padding()
+                        .transition(.scale(scale: 0.95))
+                        .background(
+                            Color.black.opacity(0.3)
+                                .edgesIgnoringSafeArea(.all)
+                                .onTapGesture {
+                                    withAnimation {
+                                        showDetailsModal.toggle()
+                                    }
+                                }
+                        )
+                }
+                
                 
                 // Calendar Popup
                 if showCalendar {
@@ -151,6 +173,62 @@ struct HomeView: View {
         }
     }
 }
+
+
+// New View for Details Modal
+struct DetailsModalView: View {
+    @Binding var showDetailsModal: Bool
+    
+    var body: some View {
+        VStack(spacing: 20) {
+            // Close Button
+            HStack {
+                Spacer()
+                Button(action: {
+                    withAnimation {
+                        showDetailsModal.toggle()
+                    }
+                }) {
+                    Image(systemName: "xmark.circle.fill")
+                        .font(.title)
+                        .foregroundColor(.gray)
+                        .padding()
+                }
+            }
+            
+            // Modal Content
+            Text("Daily Details")
+                .font(.title)
+                .fontWeight(.bold)
+            
+            VStack(alignment: .leading, spacing: 16) {
+                Text("Calories: 1,883 out of 2,500 kcal")
+                    .font(.headline)
+                Text("Distance: 7.5 km")
+                    .font(.headline)
+                Text("Steps: 9,832 out of 10,000")
+                    .font(.headline)
+            }
+            .padding()
+            .frame(maxWidth: .infinity)
+            .background(
+                RoundedRectangle(cornerRadius: 20)
+                    .fill(Color.white)
+                    .shadow(color: .gray.opacity(0.2), radius: 5)
+            )
+            
+            Spacer()
+        }
+        .padding()
+        .frame(maxWidth: .infinity)
+        .frame(height:400)
+        .background(Color.white)
+        .cornerRadius(20)
+//        .shadow(radius: 10)
+    }
+}
+
+
 
 struct CalendarView: View {
     @Binding var selectedDate: Date
