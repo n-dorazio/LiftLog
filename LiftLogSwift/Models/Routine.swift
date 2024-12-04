@@ -6,8 +6,20 @@
 //
 import Foundation
 
-struct Routine: Identifiable {
-    let id = UUID()
-    let name: String
-    var exercises: [Exercise] = []
+struct Routine: Identifiable, Codable {
+    var id: UUID
+    var name: String
+    var exercises: [Exercise]
+    
+    init(id: UUID = UUID(), name: String, exercises: [Exercise] = []) {
+        self.id = id
+        self.name = name
+        self.exercises = exercises
+    }
+    
+    enum CodingKeys: String, CodingKey {
+        case id
+        case name
+        case exercises
+    }
 }
