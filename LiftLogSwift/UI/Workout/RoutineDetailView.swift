@@ -12,103 +12,150 @@ struct RoutineDetailView: View {
     @Binding var routine: Routine
     @Environment(\.presentationMode) var presentationMode
     @State private var showAddExercise = false
-    @State private var showWorkoutSession = false
+    @State private var selectedExerciseIndex: Int?
+    @State private var isEditing = false
     
     var body: some View {
         NavigationView {
-            ScrollView {
-                if routine.exercises.isEmpty {
-                    VStack {
-                        Spacer()
-                        Text("Add Exercises to this Routine to see them here")
-                            .font(.title2)
-                            .multilineTextAlignment(.center)
-                            .foregroundColor(.gray)
-                        Spacer()
-                    }
-                } else {
-                    VStack(spacing: 20) {
-                        ForEach(routine.exercises) { exercise in
-                            VStack(spacing: 16) {
-                                HStack {
-                                    Text(exercise.name)
-                                        .font(.title2)
-                                        .bold()
-                                    Spacer()
-                                    Image(systemName: "pencil")
-                                        .foregroundColor(.gray)
-                                }
-                                
-                                HStack {
-                                    Image(systemName: exercise.icon)
-                                        .font(.system(size: 60))
-                                    Spacer()
-                                    VStack(alignment: .trailing, spacing: 8) {
-                                        HStack {
-                                            Image(systemName: "clock")
-                                            Text(exercise.duration)
-                                        }
-                                        HStack {
-                                            Image(systemName: "flame")
-                                            Text(exercise.calories)
-                                        }
-                                    }
-                                }
-                                
-                                Button(action: {
-                                    showWorkoutSession = true
-                                }) {
-                                    Text("Start")
-                                        .frame(maxWidth: .infinity)
-                                        .padding()
-                                        .background(Color.white)
-                                        .cornerRadius(10)
-                                }
-                                .sheet(isPresented: $showWorkoutSession) {
-                                    WorkoutSessionView(routine: routine, exercise: exercise)
-                                }
-                            }
-                            .padding()
-                            .background(Color.gray.opacity(0.1))
-                            .cornerRadius(20)
-                        }
-                    }
-                    .padding()
-                }
-            }
+            ExerciseListContent(
+                routine: $routine,
+                routineStore: routineStore,
+                isEditing: isEditing,
+                selectedExerciseIndex: $selectedExerciseIndex
+            )
+            .listStyle(PlainListStyle())
             .navigationTitle(routine.name)
             .navigationBarItems(
-                leading: Button(action: {
-                    presentationMode.wrappedValue.dismiss()
-                }) {
-                    Image(systemName: "chevron.left")
-                        .font(.title2)
-                        .foregroundColor(.black)
-                },
-                trailing: Button(action: {
-                    showAddExercise = true
-                }) {
-                    Image(systemName: "plus")
-                        .font(.title2)
-                        .foregroundColor(.white)
-                        .padding(12)
-                        .background(
-                            Circle()
-                                .fill(
-                                    LinearGradient(
-                                        gradient: Gradient(colors: [.orange, .red]),
-                                        startPoint: .topLeading,
-                                        endPoint: .bottomTrailing
-                                    )
-                                )
-                        )
-                }
+                leading: backButton,
+                trailing: addButton
             )
             .sheet(isPresented: $showAddExercise) {
                 AddExerciseView(routineStore: routineStore, routine: $routine)
             }
+            .sheet(isPresented: Binding(
+                get: { selectedExerciseIndex != nil },
+                set: { if !$0 { selectedExerciseIndex = nil } }
+            )) {
+                if let index = selectedExerciseIndex {
+                    WorkoutSessionView(workoutStore: WorkoutStore(), routine: routine, initialExerciseIndex: index)
+                }
+            }
         }
     }
+    
+    private var backButton: some View {
+        Button(action: {
+            presentationMode.wrappedValue.dismiss()
+        }) {
+            Image(systemName: "chevron.left")
+                .font(.title2)
+                .foregroundColor(.black)
+        }
+    }
+    
+    private var addButton: some View {
+        Button(action: {
+            showAddExercise = true
+        }) {
+            Image(systemName: "plus")
+                .font(.title2)
+                .foregroundColor(.white)
+                .padding(12)
+                .background(
+                    Circle()
+                        .fill(
+                            LinearGradient(
+                                gradient: Gradient(colors: [.orange, .red]),
+                                startPoint: .topLeading,
+                                endPoint: .bottomTrailing
+                            )
+                        )
+                )
+        }
+    }
+}
+
+struct ExerciseListContent: View {
+    @Binding var routine: Routine
+    let routineStore: RoutineStore
+    let isEditing: Bool
+    @Binding var selectedExerciseIndex: Int?
+    
+    var body: some View {
+        List {
+            ForEach(Array(routine.exercises.enumerated()), id: \.element.id) { index, exercise in
+                RoutineExerciseCard(
+                    exercise: exercise,
+                    isEditing: isEditing,
+                    onStart: {
+                        selectedExerciseIndex = routine.exercises.firstIndex(where: { $0.id == exercise.id })
+                    }
+                )
+                .swipeActions(edge: .trailing, allowsFullSwipe: true) {
+                    Button(role: .destructive) {
+                        routineStore.deleteExercise(routineId: routine.id, exerciseId: exercise.id)
+                        routine.exercises.removeAll { $0.id == exercise.id }
+                    } label: {
+                        Label("Delete", systemImage: "trash")
+                    }
+                }
+            }
+        }
+    }
+}
+
+struct RoutineExerciseCard: View {
+    let exercise: Exercise
+    let isEditing: Bool
+    let onStart: () -> Void
+    
+    var body: some View {
+        VStack(spacing: 16) {
+            HStack {
+                Text(exercise.name)
+                    .font(.title2)
+                    .bold()
+                Spacer()
+                if isEditing {
+                    Image(systemName: "line.3.horizontal")
+                        .foregroundColor(.gray)
+                }
+            }
+            
+            HStack {
+                Image(systemName: exercise.icon)
+                    .font(.system(size: 60))
+                Spacer()
+                VStack(alignment: .trailing, spacing: 8) {
+                    HStack {
+                        Image(systemName: "clock")
+                        Text(exercise.duration)
+                    }
+                    HStack {
+                        Image(systemName: "flame")
+                        Text(exercise.calories)
+                    }
+                }
+            }
+            
+            Button(action: onStart) {
+                Text("Start")
+                    .frame(maxWidth: .infinity)
+                    .padding()
+                    .background(Color.white)
+                    .cornerRadius(10)
+            }
+        }
+        .padding()
+        .background(Color.gray.opacity(0.1))
+        .cornerRadius(20)
+    }
+}
+
+// Helper struct to make the index Identifiable
+struct IndexWrapper: Identifiable {
+    let id = UUID()
+    let index: Int
 }
 
 

@@ -11,10 +11,7 @@ struct ExerciseListView: View {
     let categoryTitle: String
     @Environment(\.presentationMode) var presentationMode
     
-    let exercises: [Exercise] = [
-        Exercise(name: "Back Rows", duration: "15 Mins", calories: "100Kcals", icon: "figure.strengthtraining.traditional"),
-        Exercise(name: "Lat Pulldown", duration: "15 Mins", calories: "100Kcals", icon: "figure.strengthtraining.functional")
-    ]
+    let exercises: [Exercise] = []
     
     var body: some View {
         NavigationView {

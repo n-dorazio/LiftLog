@@ -7,7 +7,7 @@
 
 import Foundation
 
-struct Exercise: Identifiable {
+struct Exercise: Identifiable, Codable {
     let id: UUID
     let name: String
     let notes: String
@@ -15,8 +15,8 @@ struct Exercise: Identifiable {
     let calories: String
     let icon: String
     
-    init(name: String, notes: String = "", duration: String = "15 Mins", calories: String = "100Kcals", icon: String = "figure.strengthtraining.traditional") {
-        self.id = UUID()
+    init(id: UUID = UUID(), name: String, notes: String = "", duration: String = "15 Mins", calories: String = "150 Kcal", icon: String = "figure.strengthtraining.traditional") {
+        self.id = id
         self.name = name
         self.notes = notes
         self.duration = duration
