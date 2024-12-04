@@ -1,5 +1,6 @@
 //
 //  LogView.swift
+
 //  LiftLogSwift
 //
 //  Created by Nathaniel D'Orazio on 2024-11-21.
