@@ -33,9 +33,9 @@ class WorkoutStore: ObservableObject {
         saveSessions()
     }
     
-    func updateSession(_ session: WorkoutSession) {
-        if let index = sessions.firstIndex(where: { $0.id == session.id }) {
-            sessions[index] = session
+    func updateSession(_ updatedSession: WorkoutSession) {
+        if let index = sessions.firstIndex(where: { $0.id == updatedSession.id }) {
+            sessions[index] = updatedSession
             saveSessions()
         }
     }

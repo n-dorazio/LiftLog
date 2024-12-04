@@ -14,7 +14,7 @@ struct AddLogExerciseView: View {
     @State private var selectedIcon = "figure.strengthtraining.traditional"
     @State private var isIconGridExpanded = false
     @State private var sets: [WorkoutSession.ExerciseSession.SetData] = [
-        .init(reps: 0, weight: 0, restTime: 60)
+        .init(reps: nil, weight: nil)
     ]
     
     var body: some View {
@@ -62,31 +62,87 @@ struct AddLogExerciseView: View {
                             .font(.title2)
                             .bold()
                         
-                        ForEach($sets) { $set in
+                        // Sets Header
+                        HStack {
+                            Text("Set")
+                                .font(.headline)
+                                .bold()
+                                .frame(width: 40)
+                            Text("Reps")
+                                .font(.headline)
+                                .bold()
+                                .frame(maxWidth: .infinity)
+                            Text("Weight")
+                                .font(.headline)
+                                .bold()
+                                .frame(maxWidth: .infinity)
+                        }
+                        .padding(.horizontal)
+                        
+                        // Sets List
+                        ForEach(Array(sets.enumerated()), id: \.element.id) { index, set in
                             HStack {
-                                TextField("Reps", value: $set.reps, format: .number)
-                                    .textFieldStyle(RoundedBorderTextFieldStyle())
-                                    .frame(width: 80)
-                                TextField("Weight", value: $set.weight, format: .number)
-                                    .textFieldStyle(RoundedBorderTextFieldStyle())
-                                    .frame(width: 80)
-                                Spacer()
-                                if sets.count > 1 {
-                                    Button(action: { sets.removeLast() }) {
-                                        Image(systemName: "minus.circle.fill")
-                                            .foregroundColor(.red)
-                                    }
+                                Text("\(index + 1)")
+                                    .font(.headline)
+                                    .bold()
+                                    .frame(width: 40)
+                                
+                                TextField("0", text: Binding(
+                                    get: { sets[index].reps == nil ? "" : "\(sets[index].reps!)" },
+                                    set: { sets[index].reps = Int($0) }
+                                ))
+                                .keyboardType(.numberPad)
+                                .frame(maxWidth: .infinity)
+                                .textFieldStyle(RoundedBorderTextFieldStyle())
+                                
+                                TextField("0", text: Binding(
+                                    get: { sets[index].weight == nil ? "" : "\(sets[index].weight!)" },
+                                    set: { sets[index].weight = Double($0) }
+                                ))
+                                .keyboardType(.numberPad)
+                                .frame(maxWidth: .infinity)
+                                .textFieldStyle(RoundedBorderTextFieldStyle())
+                            }
+                            .padding(.horizontal)
+                        }
+                        
+                        // Add/Remove Set Buttons
+                        VStack(spacing: 12) {
+                            Button(action: { sets.append(.init()) }) {
+                                Text("Add Set")
+                                    .font(.headline)
+                                    .frame(maxWidth: .infinity)
+                                    .padding()
+                                    .background(
+                                        LinearGradient(
+                                            gradient: Gradient(colors: [.orange, .red]),
+                                            startPoint: .leading,
+                                            endPoint: .trailing
+                                        )
+                                    )
+                                    .foregroundColor(.white)
+                                    .cornerRadius(20)
+                            }
+                            
+                            if sets.count > 1 {
+                                Button(action: { sets.removeLast() }) {
+                                    Text("Remove Set")
+                                        .font(.headline)
+                                        .frame(maxWidth: .infinity)
+                                        .padding()
+                                        .background(
+                                            LinearGradient(
+                                                gradient: Gradient(colors: [.red, .orange]),
+                                                startPoint: .leading,
+                                                endPoint: .trailing
+                                            )
+                                        )
+                                        .foregroundColor(.white)
+                                        .cornerRadius(20)
                                 }
                             }
                         }
-                        
-                        Button(action: { sets.append(.init()) }) {
-                            Text("Add Set")
-                                .frame(maxWidth: .infinity)
-                                .padding()
-                                .background(Color.gray.opacity(0.1))
-                                .cornerRadius(10)
-                        }
+                        .padding(.top)
                     }
                 }
                 .padding()

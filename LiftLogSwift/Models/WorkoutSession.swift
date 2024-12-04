@@ -24,15 +24,13 @@ struct WorkoutSession: Identifiable, Codable {
         
         struct SetData: Identifiable, Codable {
             var id: UUID
-            var reps: Int
-            var weight: Double
-            var restTime: TimeInterval
+            var reps: Int?
+            var weight: Double?
             
-            init(reps: Int = 0, weight: Double = 0, restTime: TimeInterval = 60) {
+            init(reps: Int? = nil, weight: Double? = nil) {
                 self.id = UUID()
                 self.reps = reps
                 self.weight = weight
-                self.restTime = restTime
             }
         }
         

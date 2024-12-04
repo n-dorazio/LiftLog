@@ -9,6 +9,8 @@ import SwiftUI
 
 struct WorkoutLogCard: View {
     let session: WorkoutSession
+    @ObservedObject var workoutStore: WorkoutStore
+    @State private var showEditSheet = false
     
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
@@ -23,6 +25,18 @@ struct WorkoutLogCard: View {
                         .foregroundColor(.gray)
                 }
                 Spacer()
+                
+                // Edit Button
+                Button(action: {
+                    showEditSheet = true
+                }) {
+                    Image(systemName: "pencil")
+                        .foregroundColor(.gray)
+                        .padding(8)
+                        .background(Color.gray.opacity(0.1))
+                        .clipShape(Circle())
+                }
+                
                 Text(formatDuration(session.duration))
                     .font(.headline)
                     .foregroundColor(.gray)
@@ -39,6 +53,9 @@ struct WorkoutLogCard: View {
         .background(Color.white)
         .cornerRadius(20)
         .shadow(color: .gray.opacity(0.1), radius: 10)
+        .sheet(isPresented: $showEditSheet) {
+            EditWorkoutLogView(workoutStore: workoutStore, session: session)
+        }
     }
     
     private func formatDate(_ date: Date) -> String {
@@ -80,6 +97,6 @@ struct ExerciseLogRow: View {
     }
     
     private func formatSets(_ sets: [WorkoutSession.ExerciseSession.SetData]) -> String {
-        "\(sets.count) sets • \(sets.map { "\($0.reps)×\(Int($0.weight))lbs" }.joined(separator: ", "))"
+        "\(sets.count) sets • \(sets.map { "\($0.reps ?? 0)×\(Int($0.weight ?? 0))lbs" }.joined(separator: ", "))"
     }
 }

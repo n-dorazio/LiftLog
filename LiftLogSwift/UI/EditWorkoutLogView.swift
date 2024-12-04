@@ -1,20 +1,29 @@
 //
-//  AddWorkoutLogView.swift
+//  EditWorkoutLogView.swift
 //  LiftLogSwift
 //
 //  Created by Nathaniel D'Orazio on 2024-12-03.
 //
-
 import SwiftUI
 
-struct AddWorkoutLogView: View {
+struct EditWorkoutLogView: View {
     @Environment(\.presentationMode) var presentationMode
     @ObservedObject var workoutStore: WorkoutStore
-    @State private var routineName = ""
-    @State private var date = Date()
-    @State private var duration = ""
-    @State private var exercises: [WorkoutSession.ExerciseSession] = []
+    let session: WorkoutSession
+    @State private var routineName: String
+    @State private var date: Date
+    @State private var duration: String
+    @State private var exercises: [WorkoutSession.ExerciseSession]
     @State private var showAddExercise = false
+    
+    init(workoutStore: WorkoutStore, session: WorkoutSession) {
+        self.workoutStore = workoutStore
+        self.session = session
+        _routineName = State(initialValue: session.routineName)
+        _date = State(initialValue: session.date)
+        _duration = State(initialValue: String(Int(session.duration / 60)))
+        _exercises = State(initialValue: session.exercises)
+    }
     
     var body: some View {
         NavigationView {
@@ -51,7 +60,7 @@ struct AddWorkoutLogView: View {
                         Text("Duration (minutes)")
                             .font(.title2)
                             .bold()
-                        TextField("60", text: $duration)
+                        TextField("45", text: $duration)
                             .keyboardType(.numberPad)
                             .padding()
                             .background(
@@ -101,7 +110,7 @@ struct AddWorkoutLogView: View {
                 }
                 .padding()
             }
-            .navigationTitle("Add Workout")
+            .navigationTitle("Edit Workout")
             .navigationBarItems(
                 leading: Button("Cancel") {
                     presentationMode.wrappedValue.dismiss()
@@ -111,28 +120,26 @@ struct AddWorkoutLogView: View {
                 }
                 .disabled(routineName.isEmpty || duration.isEmpty)
             )
-        }
-        .sheet(isPresented: $showAddExercise) {
-            AddLogExerciseView(exercises: $exercises)
+            .sheet(isPresented: $showAddExercise) {
+                AddLogExerciseView(exercises: $exercises)
+            }
         }
     }
     
     private func saveWorkout() {
-        guard let durationInSeconds = Double(duration).map({ $0 * 60 }) else { return }
-        
-        let session = WorkoutSession(
-            id: UUID(),
+       
+        let updatedSession = WorkoutSession(
+            id: session.id,
             routineName: routineName,
             date: date,
-            duration: durationInSeconds,
+            duration: TimeInterval(Int(duration) ?? 0) * 60,
             totalCalories: exercises.reduce(0) { total, exercise in
                 total + (exercise.sets.count * 50) // 50 calories per set as an example
             },
             exercises: exercises
         )
         
-        workoutStore.addSession(session)
+        workoutStore.updateSession(updatedSession)
         presentationMode.wrappedValue.dismiss()
     }
 }
-
