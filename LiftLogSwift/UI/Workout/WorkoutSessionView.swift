@@ -9,26 +9,41 @@ import SwiftUI
 import Combine
 
 struct WorkoutSessionView: View {
+    @ObservedObject var workoutStore: WorkoutStore
     let routine: Routine
     let initialExerciseIndex: Int
-    @State private var currentExerciseIndex: Int
     @Environment(\.presentationMode) var presentationMode
-    @State private var timeRemaining = 5
+    @State private var currentExerciseIndex: Int
+    @State private var workoutDuration = 0
+    @State private var exerciseTimeRemaining = 5
     @State private var isCountingDown = false
     @State private var showStartPrompt = true
     @State private var sets: [Set] = [Set(reps: "", weight: "")]
-    @State private var showSkipAlert = false
     @State private var elapsedTime = 0
     @State private var isPaused = false
+    @State private var showSkipAlert = false
+    @State private var completedExercises: [WorkoutSession.ExerciseSession] = []
     
-    init(routine: Routine, initialExerciseIndex: Int = 0) {
+    struct Set: Identifiable {
+        let id = UUID()
+        var reps: String
+        var weight: String
+    }
+    
+    init(workoutStore: WorkoutStore, routine: Routine, initialExerciseIndex: Int = 0) {
+        self.workoutStore = workoutStore
         self.routine = routine
         self.initialExerciseIndex = initialExerciseIndex
         _currentExerciseIndex = State(initialValue: initialExerciseIndex)
     }
     
     var currentExercise: Exercise {
-        routine.exercises[currentExerciseIndex]
+        guard currentExerciseIndex < routine.exercises.count else {
+            // If we somehow get an invalid index, finish the workout
+            finishWorkout()
+            return routine.exercises[routine.exercises.count - 1] // Return last exercise as fallback
+        }
+        return routine.exercises[currentExerciseIndex]
     }
     
     let timer = Timer.publish(every: 1, on: .main, in: .common).autoconnect()
@@ -37,6 +52,49 @@ struct WorkoutSessionView: View {
         let minutes = seconds / 60
         let remainingSeconds = seconds % 60
         return String(format: "%02d:%02d", minutes, remainingSeconds)
+    }
+    
+    private func saveCurrentExercise() {
+        let exercise = currentExercise
+        let exerciseSession = WorkoutSession.ExerciseSession(
+            id: UUID(),
+            name: exercise.name,
+            icon: exercise.icon,
+            sets: sets.compactMap { set in
+                guard let reps = Int(set.reps),
+                      let weight = Double(set.weight) else { return nil }
+                return WorkoutSession.ExerciseSession.SetData(
+                    reps: reps,
+                    weight: weight
+                )
+            }
+        )
+        completedExercises.append(exerciseSession)
+    }
+    
+    private func finishWorkout() {
+        // Make sure the last exercise is saved
+        if !completedExercises.contains(where: { $0.name == currentExercise.name }) {
+            saveCurrentExercise()
+        }
+        
+        let session = WorkoutSession(
+            id: UUID(),
+            routineName: routine.name,
+            date: Date(),
+            duration: TimeInterval(workoutDuration),
+            totalCalories: completedExercises.reduce(0) { total, exercise in
+                total + (exercise.sets.count * 50) // 50 calories per set as an example
+            },
+            exercises: completedExercises
+        )
+        
+        workoutStore.addSession(session)
+        presentationMode.wrappedValue.dismiss()
+    }
+    
+    var isLastExercise: Bool {
+        currentExerciseIndex == routine.exercises.count - 1
     }
     
     var body: some View {
@@ -95,7 +153,7 @@ struct WorkoutSessionView: View {
                         Text("GET READY!")
                             .font(.system(size: 40, weight: .bold))
                         
-                        Text("\(timeRemaining)")
+                        Text("\(exerciseTimeRemaining)")
                             .font(.system(size: 80, weight: .bold))
                         
                         Text(currentExercise.name)
@@ -129,7 +187,7 @@ struct WorkoutSessionView: View {
                             .bold()
                         
                         // Timer Display
-                        Text(formatTime(elapsedTime))
+                        Text(formatTime(workoutDuration))
                             .font(.system(size: 40, weight: .bold))
                             .monospacedDigit()
                         
@@ -167,16 +225,24 @@ struct WorkoutSessionView: View {
                                         .frame(width: 40)
                                     
                                     TextField("0", text: Binding(
-                                        get: { sets[index].reps },
-                                        set: { sets[index].reps = $0 }
+                                        get: { self.sets[safe: index]?.reps ?? "" },
+                                        set: { newValue in
+                                            if index < self.sets.count {
+                                                self.sets[index].reps = newValue
+                                            }
+                                        }
                                     ))
                                     .keyboardType(.numberPad)
                                     .textFieldStyle(RoundedBorderTextFieldStyle())
                                     .frame(maxWidth: .infinity)
                                     
                                     TextField("0", text: Binding(
-                                        get: { sets[index].weight },
-                                        set: { sets[index].weight = $0 }
+                                        get: { self.sets[safe: index]?.weight ?? "" },
+                                        set: { newValue in
+                                            if index < self.sets.count {
+                                                self.sets[index].weight = newValue
+                                            }
+                                        }
                                     ))
                                     .keyboardType(.numberPad)
                                     .textFieldStyle(RoundedBorderTextFieldStyle())
@@ -229,9 +295,18 @@ struct WorkoutSessionView: View {
                         
                         Spacer()
                         
-                        if currentExerciseIndex < routine.exercises.count - 1 {
+                        if !isLastExercise {
                             Button(action: {
-                                showSkipAlert = true
+                                saveCurrentExercise()
+                                
+                                // Reset states for next exercise
+                                currentExerciseIndex += 1
+                                exerciseTimeRemaining = 5
+                                showStartPrompt = true
+                                sets = [Set(reps: "", weight: "")]
+                                // Note: We're not resetting workoutDuration here
+                                isPaused = false
+                                showSkipAlert = false
                             }) {
                                 Text("Next Exercise")
                                     .font(.headline)
@@ -252,7 +327,8 @@ struct WorkoutSessionView: View {
                         }
                         
                         Button(action: {
-                            presentationMode.wrappedValue.dismiss()
+                            saveCurrentExercise()
+                            finishWorkout()
                         }) {
                             Text("End Workout")
                                 .font(.headline)
@@ -282,15 +358,16 @@ struct WorkoutSessionView: View {
                 
                 Button(action: {
                     if currentExerciseIndex < routine.exercises.count - 1 {
+                        saveCurrentExercise()
                         currentExerciseIndex += 1
-                        timeRemaining = 5
+                        exerciseTimeRemaining = 5
                         showStartPrompt = true
                         isCountingDown = false
                         sets = [Set(reps: "", weight: "")]
                         elapsedTime = 0
                         isPaused = false
                     } else {
-                        presentationMode.wrappedValue.dismiss()
+                        finishWorkout()
                     }
                     showSkipAlert = false
                 }) {
@@ -324,13 +401,13 @@ struct WorkoutSessionView: View {
         }
         .onReceive(timer) { _ in
             if isCountingDown {
-                if timeRemaining > 0 {
-                    timeRemaining -= 1
+                if exerciseTimeRemaining > 0 {
+                    exerciseTimeRemaining -= 1
                 } else {
                     isCountingDown = false
                 }
             } else if !isPaused {
-                elapsedTime += 1
+                workoutDuration += 1
             }
         }
         .navigationBarItems(
@@ -342,6 +419,12 @@ struct WorkoutSessionView: View {
                     .foregroundColor(.black)
             }
         )
+    }
+}
+
+extension Array {
+    subscript(safe index: Index) -> Element? {
+        return indices.contains(index) ? self[index] : nil
     }
 }
 
