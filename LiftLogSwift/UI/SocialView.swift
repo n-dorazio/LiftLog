@@ -9,21 +9,27 @@ import PhotosUI
 import CoreLocationUI
 
 
-struct Post: Identifiable {
-    let id = UUID() // Unique identifier for each post
-    let username: String
-    let timeAge: String
-    let profilePicture: String
-    let content: String
-}
-
-struct SocialView: View {
-    let posts = [
+class PostsManager: ObservableObject {
+    @Published var posts: [Post] = [
         Post(username: "Jordan", timeAge: "2h ago", profilePicture: "jordan", content: "Just completed a great workout! 💪"),
         Post(username: "Jane Doe", timeAge: "4h ago", profilePicture: "JaneDoe", content: "Loving my new fitness routine!"),
         Post(username: "Christie", timeAge: "6h ago", profilePicture: "christie", content: "Feeling strong after today's session."),
         Post(username: "Yousri", timeAge: "8h ago", profilePicture: "yousri", content: "Ran 5k this morning 🏃‍♀️!")
     ]
+}
+
+struct Post: Identifiable {
+    let id = UUID() // Unique identifier for each post
+    let username: String
+    let timeAge: String
+    let profilePicture: String
+    
+    let content: String
+}
+
+struct SocialView: View {
+   
+    @StateObject var postsManager = PostsManager()
 
   
     var body: some View {
@@ -32,7 +38,7 @@ struct SocialView: View {
                 VStack(spacing: 20) {
 
                     // Use ForEach to dynamically create posts
-                    ForEach(posts) { post in
+                    ForEach(postsManager.posts) { post in
                         SocialPost(post: post) // Pass each post to SocialPost
 
                     }
@@ -45,14 +51,14 @@ struct SocialView: View {
                 ToolbarItem(placement: .navigationBarTrailing) {
                     HStack(spacing: 15) {
                         // Add Post Button
-                        NavigationLink(destination: CreatePostView()) {
+                        NavigationLink(destination: CreatePostView(postsManager: postsManager)) {
                             Image(systemName: "plus")
                                 .font(.system(size: 20, weight: .bold))
                                 .foregroundColor(.white)
                                 .frame(width: 40, height: 40)
                                 .background(Color.orange)
                                 .clipShape(Circle())
-                                .shadow(color: .gray.opacity(0.6), radius: 5, x: 0, y: 4)
+                                //.shadow(color: .gray.opacity(0.6), radius: 5, x: 0, y: 4)
                         }
                         // Messages Button
                         NavigationLink(destination: MessagingView()) {
@@ -62,7 +68,7 @@ struct SocialView: View {
                                 .frame(width: 40, height: 40)
                                 .background(Color.orange)
                                 .clipShape(Circle())
-                                .shadow(color: .gray.opacity(0.6), radius: 5, x: 0, y: 4)
+                                //.shadow(color: .gray.opacity(0.6), radius: 5, x: 0, y: 4)
                         }
                     }
                 }
@@ -370,7 +376,9 @@ struct CreatePostView: View {
     @State private var postText = ""
     @State private var selectedImage: UIImage? = nil
     @State private var showingImagePicker = false
-
+    @ObservedObject var postsManager: PostsManager
+    @Environment(\.presentationMode) var presentationMode
+    
     var body: some View {
         NavigationView {
             VStack {
@@ -427,18 +435,32 @@ struct CreatePostView: View {
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
-                    Button(action: {
-                        // Handle post creation
-                        print("Post created with text: \(postText), image: \(selectedImage != nil ? "Yes" : "No")")
-                    }) {
+                    Button(action: createPost){
                         Text("Post")
                             .font(.headline)
                             .foregroundColor(postText.isEmpty ? Color.gray : Color.orange)
+                        
                     }
                     .disabled(postText.isEmpty) // Disable button if no text is entered
                 }
             }
         }
+    }
+    
+    func createPost() {
+        guard !postText.isEmpty else { return }
+        
+        // Add the new post
+        let newPost = Post(
+            username: "Jane Doe",
+            timeAge: "Just now",
+            profilePicture: "JaneDoe", // Placeholder for now
+            content: postText
+        )
+        
+        postsManager.posts.insert(newPost, at: 0) // Add to the top of the feed
+        postText = "" // Clear the text field
+        presentationMode.wrappedValue.dismiss()
     }
 }
 
@@ -490,3 +512,4 @@ struct ImagePicker: UIViewControllerRepresentable {
 #Preview {
     SocialView()
 }
+
