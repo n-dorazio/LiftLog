@@ -117,7 +117,7 @@ struct AddFriendsView: View {
     }
 }
 
-struct Friend: Identifiable, Equatable {
+struct Friend: Identifiable, Equatable, Codable {
     let id: String
     let name: String
     let image: String
