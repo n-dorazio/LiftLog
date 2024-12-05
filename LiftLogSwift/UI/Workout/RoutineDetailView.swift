@@ -110,6 +110,14 @@ struct ExerciseListContent: View {
                 .listRowBackground(Color.clear)
                 .listRowSeparator(.hidden)
                 .padding(.vertical, 8)
+                .swipeActions(edge: .trailing, allowsFullSwipe: true) {
+                    Button(role: .destructive) {
+                        routineStore.deleteExercise(routineId: routine.id, exerciseId: exercise.id)
+                        routine.exercises.removeAll { $0.id == exercise.id }
+                    } label: {
+                        Label("Delete", systemImage: "trash")
+                    }
+                }
             }
         }
         .listStyle(PlainListStyle())
