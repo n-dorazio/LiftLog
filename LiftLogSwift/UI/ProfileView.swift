@@ -9,49 +9,55 @@ import SwiftUI
 import UIKit
 import Foundation
 
-// MARK: - User Profile Model
+//
 
 
 struct ExistingPosts: Identifiable, Codable {
-    let id = UUID()
+    let id: UUID
     let username: String
     let timeAgo: String
     let content: String
     var likes: Int
-    var isLiked: Bool = false
+    var isLiked: Bool
     var comments: [Comments]
     let postImage: String?
     let profileImage: String
+
+    
+    init(id: UUID = UUID(), username: String, timeAgo: String, content: String, likes: Int, isLiked: Bool = false, comments: [Comments], postImage: String?, profileImage: String) {
+        self.id = id
+        self.username = username
+        self.timeAgo = timeAgo
+        self.content = content
+        self.likes = likes
+        self.isLiked = isLiked
+        self.comments = comments
+        self.postImage = postImage
+        self.profileImage = profileImage
+    }
 }
 
 struct Comments: Identifiable, Codable {
-    let id = UUID()
+    let id: UUID
     let username: String
     let content: String
     let profileImage: String
+
+    // initialize properties
+    init(id: UUID = UUID(), username: String, content: String, profileImage: String) {
+        self.id = id
+        self.username = username
+        self.content = content
+        self.profileImage = profileImage
+    }
 }
 
-let post = ExistingPosts(
-    username: "Jane Doe",
-    timeAgo: "2s ago",
-    content: "Hey Pookies! Just started using this amazing app called LiftLog. Now my fitness goals seem achievable!!",
-    likes: 121,
-    comments: [
-        Comments(username: "John Smith", content: "Great job!", profileImage: "jordan"),
-        Comments(username: "Alice Johnson", content: "Keep it up!", profileImage: "kate"),
-        Comments(username: "Bob Lee", content: "Inspirational!", profileImage: "yousri")
-    ],
-    postImage: "JaneDoePost",
-    profileImage: "JaneDoe"
-)
-
 struct PostDetailView: View {
-    @State var post: ExistingPosts
+    @Binding var post: ExistingPosts
     @State private var newCommentText = ""
-    @State private var isLiked: Bool = false
 
     var body: some View {
-        VStack(alignment: .leading) { // Set alignment to leading
+        VStack(alignment: .leading) {
             ScrollView {
                 // Post Content
                 VStack(alignment: .leading, spacing: 12) {
@@ -94,12 +100,12 @@ struct PostDetailView: View {
                     HStack(spacing: 30) {
                         // Like Button
                         Button(action: {
-                            isLiked.toggle()
-                            post.likes += isLiked ? 1 : -1
+                            post.isLiked.toggle()
+                            post.likes += post.isLiked ? 1 : -1
                         }) {
                             HStack {
-                                Image(systemName: isLiked ? "heart.fill" : "heart")
-                                    .foregroundColor(isLiked ? .red : .gray)
+                                Image(systemName: post.isLiked ? "heart.fill" : "heart")
+                                    .foregroundColor(post.isLiked ? .red : .gray)
                                 Text("\(post.likes)")
                             }
                         }
@@ -128,7 +134,7 @@ struct PostDetailView: View {
                 .cornerRadius(20)
                 .shadow(color: .gray.opacity(0.1), radius: 5)
                 .padding()
-                .frame(maxWidth: .infinity, alignment: .leading) // Ensure the content takes up full width
+                .frame(maxWidth: .infinity, alignment: .leading)
 
                 // Comments Section
                 VStack(alignment: .leading, spacing: 12) {
@@ -147,19 +153,19 @@ struct PostDetailView: View {
                                     .font(.subheadline)
                                     .foregroundColor(.black)
                             }
-                            Spacer() // Push content to the left
+                            Spacer()
                         }
                         .padding(.vertical, 4)
-                        .frame(maxWidth: .infinity, alignment: .leading) // Ensure HStack takes up full width
+                        .frame(maxWidth: .infinity, alignment: .leading)
                     }
                 }
                 .padding(.horizontal)
-                .frame(maxWidth: .infinity, alignment: .leading) // Ensure VStack takes up full width
+                .frame(maxWidth: .infinity, alignment: .leading)
             }
 
-            // Comment Input Field
+            // comment input field
             HStack {
-                Image("JaneDoe") // Replace with the current user's profile image
+                Image("JaneDoe")
                     .resizable()
                     .aspectRatio(contentMode: .fill)
                     .frame(width: 35, height: 35)
@@ -216,7 +222,7 @@ struct ProfileView: View {
                     }
                     .padding(.horizontal)
                     
-                    // Profile Image and Stats
+                    // profile image and stats
                     VStack(spacing: 20) {
                         Image("JaneDoe")
                             .resizable()
@@ -289,18 +295,12 @@ struct ProfileView: View {
                     
                     // Posts
                     VStack(spacing: 16) {
-                        NavigationLink(destination: PostDetailView(post: post)) {
-                            SocialPostProfile(
-                                username: post.username,
-                                timeAgo: post.timeAgo,
-                                content: post.content,
-                                likes: post.likes,
-                                commentsCount: post.comments.count, // Pass comments count
-                                postImage: post.postImage,
-                                profileImage: post.profileImage
-                            )
+                        ForEach($userProfile.posts) { $post in
+                            NavigationLink(destination: PostDetailView(post: $post)) {
+                                SocialPostProfile(post: $post)
+                            }
+                            .buttonStyle(PlainButtonStyle())
                         }
-                        .buttonStyle(PlainButtonStyle())
                     }
                         .buttonStyle(PlainButtonStyle()) // Remove the default NavigationLink styling
                     }
@@ -383,22 +383,15 @@ struct CommentSheet: View {
         }
     }
 }
-struct SocialPostProfile: View {
-    let username: String
-    let timeAgo: String
-    let content: String
-    let likes: Int
-    let commentsCount: Int
-    let postImage: String?
-    let profileImage: String
 
-    @State private var isLiked = false
+struct SocialPostProfile: View {
+    @Binding var post: ExistingPosts
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
             // Header with profile image and username
             HStack(spacing: 12) {
-                Image(profileImage)
+                Image(post.profileImage)
                     .resizable()
                     .aspectRatio(contentMode: .fill)
                     .frame(width: 50, height: 50)
@@ -409,18 +402,18 @@ struct SocialPostProfile: View {
                     .shadow(radius: 5)
 
                 VStack(alignment: .leading) {
-                    Text(username)
+                    Text(post.username)
                         .font(.headline)
-                    Text(timeAgo)
+                    Text(post.timeAgo)
                         .font(.caption)
                         .foregroundColor(.gray)
                 }
             }
 
-            Text(content)
+            Text(post.content)
                 .padding(.vertical, 4)
 
-            if let postImage = postImage {
+            if let postImage = post.postImage {
                 Image(postImage)
                     .resizable()
                     .aspectRatio(contentMode: .fill)
@@ -435,30 +428,26 @@ struct SocialPostProfile: View {
             HStack(spacing: 30) {
                 // Like Button
                 Button(action: {
-                    isLiked.toggle()
-                    // Handle like action if needed
+                    post.isLiked.toggle()
+                    post.likes += post.isLiked ? 1 : -1
                 }) {
                     HStack {
-                        Image(systemName: isLiked ? "heart.fill" : "heart")
-                            .foregroundColor(isLiked ? .red : .gray)
-                        Text("\(likes)")
+                        Image(systemName: post.isLiked ? "heart.fill" : "heart")
+                            .foregroundColor(post.isLiked ? .red : .gray)
+                        Text("\(post.likes)")
                     }
                 }
 
                 // Comment Button
-                Button(action: {
-                    // Handle comment button action if needed
-                }) {
-                    HStack {
-                        Image(systemName: "bubble.right")
-                        Text("\(commentsCount)")
-                    }
+                HStack {
+                    Image(systemName: "bubble.right")
+                    Text("\(post.comments.count)")
                 }
 
                 Spacer()
 
                 // Share Button
-                ShareLink(item: content) {
+                ShareLink(item: post.content) {
                     HStack {
                         Image(systemName: "square.and.arrow.up")
                         Text("Share")
@@ -489,8 +478,6 @@ struct ActivityView: UIViewControllerRepresentable {
 
     func updateUIViewController(_ uiViewController: UIActivityViewController, context: Context) {}
 }
-
-// MARK: - Preview
 
 #Preview {
     ProfileView()

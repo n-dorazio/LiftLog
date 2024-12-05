@@ -17,6 +17,9 @@ class UserProfileModel: ObservableObject {
     init() {
         loadFriends()
         loadPosts()
+        if posts.isEmpty {
+            posts = [defaultPost]
+        }
     }
 
     // File paths
@@ -80,10 +83,12 @@ class UserProfileModel: ObservableObject {
     // a default post
     var defaultPost: ExistingPosts {
         ExistingPosts(
+            id: UUID(),
             username: "Jane Doe",
-            timeAgo: "2s ago",
+            timeAgo: "2d ago",
             content: "Hey Pookies! Just started using this amazing app called LiftLog. Now my fitness goals seem achievable!!",
             likes: 121,
+            isLiked: false,
             comments: [
                 Comments(username: "John Smith", content: "Great job!", profileImage: "jordan"),
                 Comments(username: "Alice Johnson", content: "Keep it up!", profileImage: "kate"),
