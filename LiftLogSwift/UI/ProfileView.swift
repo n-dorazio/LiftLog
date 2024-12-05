@@ -203,112 +203,124 @@ struct ProfileView: View {
     @StateObject private var settingsStore = SettingsStore()
 
     var body: some View {
-            ScrollView {
-                VStack(spacing: 24) {
-                    // Profile Header
-                    ZStack {
-                        Text(userProfile.name)
-                            .font(.title2)
-                            .bold()
-                        HStack {
-                            Spacer()
-                            Button(action: {
-                                showSettings = true
-                            }) {
-                                Image(systemName: "gearshape")
-                                    .font(.title2)
-                            }
+        ScrollView {
+            VStack(spacing: 24) {
+                // Profile Header
+                ZStack {
+                    Text(userProfile.name)
+                        .font(.title2)
+                        .bold()
+                    HStack {
+                        Spacer()
+                        Button(action: {
+                            showSettings = true
+                        }) {
+                            Image(systemName: "gearshape")
+                                .font(.title2)
                         }
                     }
-                    .padding(.horizontal)
-                    
-                    // profile image and stats
-                    VStack(spacing: 20) {
+                }
+                .padding(.horizontal)
+
+                // Profile Image and Stats
+                VStack(spacing: 20) {
+                    // Load custom image if available
+                    if let imageURL = userProfile.imageURL(),
+                       let imageData = try? Data(contentsOf: imageURL),
+                       let uiImage = UIImage(data: imageData) {
+                        Image(uiImage: uiImage)
+                            .resizable()
+                            .aspectRatio(contentMode: .fill)
+                            .frame(width: 100, height: 100)
+                            .clipShape(Circle())
+                            .overlay(Circle().stroke(Color.white, lineWidth: 2))
+                            .shadow(radius: 5)
+                    } else {
+                        // Fallback to default image
                         Image("JaneDoe")
                             .resizable()
                             .aspectRatio(contentMode: .fill)
                             .frame(width: 100, height: 100)
                             .clipShape(Circle())
-                            .overlay(
-                                Circle().stroke(Color.white, lineWidth: 2)
-                            )
+                            .overlay(Circle().stroke(Color.white, lineWidth: 2))
                             .shadow(radius: 5)
-                        
-                        HStack(spacing: 40) {
+                    }
+
+                    HStack(spacing: 40) {
+                        VStack {
+                            Text("\(userProfile.posts.count)")
+                                .font(.title2)
+                                .bold()
+                            Text("Posts")
+                                .foregroundColor(.gray)
+                        }
+
+                        // Friends Count as Button
+                        Button(action: {
+                            showFriendsList = true
+                        }) {
                             VStack {
-                                Text("2")
+                                Text("\(userProfile.friends.count)")
                                     .font(.title2)
                                     .bold()
-                                Text("Posts")
+                                    .foregroundColor(.black)
+                                Text("Friends")
                                     .foregroundColor(.gray)
                             }
-                            
-                            // Friends Count as Button
-                            Button(action: {
-                                showFriendsList = true
-                            }) {
-                                VStack {
-                                    Text("\(userProfile.friends.count)")
-                                        .font(.title2)
-                                        .bold()
-                                        .foregroundColor(.black)
-                                    Text("Friends")
-                                        .foregroundColor(.gray)
-                                }
-                            }
-                            
-                            Button(action: {
-                                showAddFriends = true
-                            }) {
-                                Image(systemName: "person.badge.plus")
-                                    .font(.title2)
-                                    .foregroundColor(.black)
-                            }
                         }
-                        
-                        Text(userProfile.bio)
-                            .foregroundColor(.gray)
-                    }
-                    
-                    // Top Routines
-                    VStack(alignment: .leading, spacing: 16) {
-                        Text("Top Routines")
-                            .font(.title3)
-                            .bold()
-                        
-                        HStack(spacing: 12) {
-                            ForEach(userProfile.topRoutines, id: \.self) { routine in
-                                Text(routine)
-                                    .padding(.horizontal, 16)
-                                    .padding(.vertical, 8)
-                                    .background(
-                                        LinearGradient(colors: [.orange, .red],
-                                                       startPoint: .leading,
-                                                       endPoint: .trailing)
-                                    )
-                                    .foregroundColor(.white)
-                                    .cornerRadius(20)
-                            }
+
+                        Button(action: {
+                            showAddFriends = true
+                        }) {
+                            Image(systemName: "person.badge.plus")
+                                .font(.title2)
+                                .foregroundColor(.black)
                         }
                     }
-                    .padding(.horizontal)
-                    
-                    // Posts
-                    VStack(spacing: 16) {
-                        ForEach($userProfile.posts) { $post in
-                            NavigationLink(destination: PostDetailView(post: $post)) {
-                                SocialPostProfile(post: $post)
-                            }
-                            .buttonStyle(PlainButtonStyle())
-                        }
-                    }
-                        .buttonStyle(PlainButtonStyle()) // Remove the default NavigationLink styling
-                    }
-                    .padding(.horizontal)
+
+                    Text(userProfile.bio)
+                        .foregroundColor(.gray)
                 }
-            .sheet(isPresented: $showSettings) {
-                SettingsView(userProfile: userProfile, settings: settingsStore)
+
+                // Top Routines
+                VStack(alignment: .leading, spacing: 16) {
+                    Text("Top Routines")
+                        .font(.title3)
+                        .bold()
+
+                    HStack(spacing: 12) {
+                        ForEach(userProfile.topRoutines, id: \.self) { routine in
+                            Text(routine)
+                                .padding(.horizontal, 16)
+                                .padding(.vertical, 8)
+                                .background(
+                                    LinearGradient(colors: [.orange, .red],
+                                                   startPoint: .leading,
+                                                   endPoint: .trailing)
+                                )
+                                .foregroundColor(.white)
+                                .cornerRadius(20)
+                        }
+                    }
+                }
+                .padding(.horizontal)
+
+                // Posts
+                VStack(spacing: 16) {
+                    ForEach($userProfile.posts) { $post in
+                        NavigationLink(destination: PostDetailView(post: $post)) {
+                            SocialPostProfile(post: $post)
+                        }
+                        .buttonStyle(PlainButtonStyle())
+                    }
+                }
+                .buttonStyle(PlainButtonStyle())
+                .padding(.horizontal)
             }
+        }
+        .sheet(isPresented: $showSettings) {
+            SettingsView(userProfile: userProfile, settings: settingsStore)
+        }
         .sheet(isPresented: $showAddFriends) {
             AddFriendsView(friends: $userProfile.friends)
         }

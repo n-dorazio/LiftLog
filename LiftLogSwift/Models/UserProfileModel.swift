@@ -6,7 +6,11 @@ class UserProfileModel: ObservableObject {
     @Published var name: String = "Jane Doe"
     @Published var bio: String = "Fitness enthusiast and cardio lover"
     @Published var topRoutines: [String] = ["Pull-ups", "Sit-ups", "Squats"]
-    @Published var profileImageName: String = "JaneDoe"
+    @Published var profileImageName: String = "JaneDoe" {
+        didSet {
+            UserDefaults.standard.set(profileImageName, forKey: "profileImageName")
+        }
+    }
     @Published var friends: [Friend] = [] {
         didSet { saveFriends() }
     }
@@ -14,11 +18,23 @@ class UserProfileModel: ObservableObject {
         didSet { savePosts() }
     }
 
+    func imageURL() -> URL? {
+        // If the profileImageName is "JaneDoe", assume it's the default image
+        if profileImageName == "JaneDoe" {
+            return nil
+        }
+        // If not default, it should be a filename in the documents directory
+        return getDocumentsDirectory().appendingPathComponent(profileImageName)
+    }
+    
     init() {
         loadFriends()
         loadPosts()
         if posts.isEmpty {
             posts = [defaultPost]
+        }
+        if let savedImageName = UserDefaults.standard.string(forKey: "profileImageName") {
+            profileImageName = savedImageName
         }
     }
 

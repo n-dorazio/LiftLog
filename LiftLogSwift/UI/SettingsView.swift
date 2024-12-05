@@ -41,16 +41,31 @@ struct SettingsView: View {
                         Button(action: {
                             showEditProfile = true
                         }) {
-                            Image(userProfile.profileImageName)
-                                .resizable()
-                                .aspectRatio(contentMode: .fill)
-                                .frame(width: 100, height: 100)
-                                .clipShape(Circle())
-                                .overlay(
-                                    Image(systemName: "pencil.circle.fill")
-                                        .foregroundColor(.blue)
-                                        .offset(x: 35, y: 35)
-                                )
+                            if let imageURL = userProfile.imageURL(),
+                               let imageData = try? Data(contentsOf: imageURL),
+                               let uiImage = UIImage(data: imageData) {
+                                Image(uiImage: uiImage)
+                                    .resizable()
+                                    .aspectRatio(contentMode: .fill)
+                                    .frame(width: 100, height: 100)
+                                    .clipShape(Circle())
+                                    .overlay(
+                                        Image(systemName: "pencil.circle.fill")
+                                            .foregroundColor(.blue)
+                                            .offset(x: 35, y: 35)
+                                    )
+                            } else {
+                                Image("JaneDoe")
+                                    .resizable()
+                                    .aspectRatio(contentMode: .fill)
+                                    .frame(width: 100, height: 100)
+                                    .clipShape(Circle())
+                                    .overlay(
+                                        Image(systemName: "pencil.circle.fill")
+                                            .foregroundColor(.blue)
+                                            .offset(x: 35, y: 35)
+                                    )
+                            }
                         }
                         
                         Text(userProfile.name)
