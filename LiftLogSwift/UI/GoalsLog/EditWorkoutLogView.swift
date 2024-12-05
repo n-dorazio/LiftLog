@@ -143,3 +143,105 @@ struct EditWorkoutLogView: View {
         presentationMode.wrappedValue.dismiss()
     }
 }
+
+struct EditExerciseLogView: View {
+    @Environment(\.presentationMode) var presentationMode
+    @Binding var exercise: WorkoutSession.ExerciseSession
+    @State private var exerciseName: String
+    @State private var selectedIcon: String
+    @State private var sets: [WorkoutSession.ExerciseSession.SetData]
+    
+    init(exercise: Binding<WorkoutSession.ExerciseSession>) {
+        self._exercise = exercise
+        _exerciseName = State(initialValue: exercise.wrappedValue.name)
+        _selectedIcon = State(initialValue: exercise.wrappedValue.icon)
+        _sets = State(initialValue: exercise.wrappedValue.sets)
+    }
+    
+    var body: some View {
+        NavigationView {
+            ScrollView {
+                VStack(spacing: 24) {
+                    // Exercise Name
+                    VStack(alignment: .leading, spacing: 8) {
+                        Text("Exercise Name")
+                            .font(.title2)
+                            .bold()
+                        TextField("Exercise name", text: $exerciseName)
+                            .padding()
+                            .background(
+                                RoundedRectangle(cornerRadius: 10)
+                                    .stroke(Color.gray.opacity(0.3), lineWidth: 1)
+                            )
+                    }
+                    
+                    // Sets
+                    VStack(alignment: .leading, spacing: 16) {
+                        Text("Sets")
+                            .font(.title2)
+                            .bold()
+                        
+                        ForEach(Array(sets.enumerated()), id: \.element.id) { index, _ in
+                            HStack {
+                                Text("\(index + 1)")
+                                    .font(.headline)
+                                    .bold()
+                                    .frame(width: 40)
+                                
+                                TextField("0", value: $sets[index].reps, format: .number)
+                                    .keyboardType(.numberPad)
+                                    .textFieldStyle(RoundedBorderTextFieldStyle())
+                                    .frame(maxWidth: .infinity)
+                                
+                                TextField("0", value: $sets[index].weight, format: .number)
+                                    .keyboardType(.numberPad)
+                                    .textFieldStyle(RoundedBorderTextFieldStyle())
+                                    .frame(maxWidth: .infinity)
+                            }
+                        }
+                        
+                        // Add/Remove Set Buttons
+                        HStack {
+                            Button(action: { sets.append(.init()) }) {
+                                Text("Add Set")
+                                    .frame(maxWidth: .infinity)
+                                    .padding()
+                                    .background(Color.orange)
+                                    .foregroundColor(.white)
+                                    .cornerRadius(10)
+                            }
+                            
+                            if sets.count > 1 {
+                                Button(action: { sets.removeLast() }) {
+                                    Text("Remove Set")
+                                        .frame(maxWidth: .infinity)
+                                        .padding()
+                                        .background(Color.red)
+                                        .foregroundColor(.white)
+                                        .cornerRadius(10)
+                                }
+                            }
+                        }
+                    }
+                }
+                .padding()
+            }
+            .navigationTitle("Edit Exercise")
+            .navigationBarItems(
+                leading: Button("Cancel") {
+                    presentationMode.wrappedValue.dismiss()
+                },
+                trailing: Button("Save") {
+                    saveExercise()
+                }
+            )
+        }
+    }
+    
+    private func saveExercise() {
+        exercise.name = exerciseName
+        exercise.icon = selectedIcon
+        exercise.sets = sets
+        presentationMode.wrappedValue.dismiss()
+    }
+}

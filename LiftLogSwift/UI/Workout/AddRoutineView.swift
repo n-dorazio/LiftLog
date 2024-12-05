@@ -13,7 +13,7 @@ struct AddRoutineView: View {
     @State private var routineName = ""
     
     var body: some View {
-        VStack(spacing: 20) {
+        VStack(spacing: 24) {
             // Header with close button
             HStack {
                 Button(action: {
@@ -35,7 +35,7 @@ struct AddRoutineView: View {
                 Text("Routine Name")
                     .font(.headline)
                 
-                TextField("New Workout", text: $routineName)
+                TextField("New Routine", text: $routineName)
                     .padding()
                     .background(
                         RoundedRectangle(cornerRadius: 10)
@@ -63,11 +63,14 @@ struct AddRoutineView: View {
                         )
                     )
                     .foregroundColor(.white)
-                    .cornerRadius(20)
+                    .cornerRadius(15)
             }
             .padding(.horizontal)
+            .disabled(routineName.isEmpty)
+            
+            Spacer()
         }
-        .padding(.vertical, 10)
+        .padding(.top, 20)
         .background(Color.white)
     }
 }
