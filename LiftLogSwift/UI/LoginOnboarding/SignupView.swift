@@ -10,12 +10,17 @@ import SwiftUI
 struct SignupView: View {
     @State private var email: String = ""
     @State private var password: String = ""
+    @State private var confirmPassword: String = ""
     @State private var isPasswordHidden: Bool = true
     @State private var isLoggedIn: Bool = false
     @State private var isSignedUp: Bool = false
     
+    // Validation State
+    @State private var errorMessage: String = ""
+    @State private var passwordMessage: String = ""
+    
     var body: some View {
-        NavigationView(){
+        NavigationView {
             ZStack {
                 // Background Gradient
                 LinearGradient(
@@ -35,12 +40,12 @@ struct SignupView: View {
                 VStack {
                     // Top Icon
                     Spacer()
-                    Image("AppLogo") //Add Icon
+                    Image("AppLogo") // Add Icon
                         .resizable()
                         .frame(width: 100, height: 100)
                         .clipShape(RoundedRectangle(cornerRadius: 12))
-                        .offset(x:0, y:0)
                         .padding(.bottom, 20)
+                    
                     // Title
                     Text("Sign up for FREE")
                         .font(.largeTitle)
@@ -82,8 +87,10 @@ struct SignupView: View {
                                 .foregroundColor(.gray)
                             if isPasswordHidden {
                                 SecureField("Enter your password", text: $password)
+                                    .onChange(of: password, perform: validatePassword)
                             } else {
                                 TextField("Enter your password", text: $password)
+                                    .onChange(of: password, perform: validatePassword)
                             }
                             Button(action: {
                                 isPasswordHidden.toggle()
@@ -97,11 +104,18 @@ struct SignupView: View {
                         .background(Color.white.opacity(0.8))
                         .cornerRadius(8)
                     }
-                    .padding(.bottom, 15)
+                    .padding(.bottom, 5)
                     .padding(.horizontal, 12)
                     
+                    // Password Requirements Message
+                    if !passwordMessage.isEmpty {
+                        Text(passwordMessage)
+                            .font(.footnote)
+                            .foregroundColor(.red)
+                            .padding(.bottom, 10)
+                    }
                     
-                    // Password Field
+                    // Confirm Password Field
                     VStack(alignment: .leading, spacing: 8) {
                         Text("Confirm Password")
                             .font(.headline)
@@ -109,9 +123,9 @@ struct SignupView: View {
                             Image(systemName: "lock")
                                 .foregroundColor(.gray)
                             if isPasswordHidden {
-                                SecureField("Enter your password", text: $password)
+                                SecureField("Confirm your password", text: $confirmPassword)
                             } else {
-                                TextField("Enter your password", text: $password)
+                                TextField("Confirm your password", text: $confirmPassword)
                             }
                             Button(action: {
                                 isPasswordHidden.toggle()
@@ -128,12 +142,18 @@ struct SignupView: View {
                     .padding(.bottom, 15)
                     .padding(.horizontal, 12)
                     
-                    
+                    // Error Message
+                    if !errorMessage.isEmpty {
+                        Text(errorMessage)
+                            .foregroundColor(.red)
+                            .font(.footnote)
+                            .padding(.bottom, 10)
+                    }
                     
                     // Sign Up Button
-                    NavigationLink(destination: OnboardingScreen1(), isActive: $isLoggedIn){
+                    NavigationLink(destination: OnboardingScreen1(), isActive: $isLoggedIn) {
                         Button(action: {
-                            isLoggedIn=true
+                            handleSignup()
                         }) {
                             HStack {
                                 Spacer()
@@ -149,18 +169,20 @@ struct SignupView: View {
                             .background(Color.black)
                             .cornerRadius(8)
                         }
-                        .padding(.bottom, 10)
-                        .padding(.horizontal, 12)
+                        .disabled(email.isEmpty || password.isEmpty || confirmPassword.isEmpty || !isPasswordValid(password))
+                        .opacity(email.isEmpty || password.isEmpty || confirmPassword.isEmpty || !isPasswordValid(password) ? 0.6 : 1.0)
                     }
+                    .padding(.bottom, 10)
+                    .padding(.horizontal, 12)
                     
                     // Login
                     HStack {
                         Text("Already have an account?")
                             .font(.body)
                             .foregroundColor(.gray)
-                        NavigationLink(destination: LoginView(), isActive: $isSignedUp){
+                        NavigationLink(destination: LoginView(), isActive: $isSignedUp) {
                             Button(action: {
-                                isSignedUp=true
+                                isSignedUp = true
                             }) {
                                 Text("Login")
                                     .font(.body)
@@ -176,12 +198,54 @@ struct SignupView: View {
                 .padding()
             }
         }
-        .navigationBarBackButtonHidden(true) //Hides the back arrow
+        .navigationBarBackButtonHidden(true) // Hides the back arrow
+    }
+    
+    private func handleSignup() {
+        errorMessage = ""
+        
+        if email.isEmpty || password.isEmpty || confirmPassword.isEmpty {
+            errorMessage = "Please fill out all fields."
+            return
+        }
+        
+        if !isValidEmail(email) {
+            errorMessage = "Please enter a valid email address."
+            return
+        }
+        
+        if !isPasswordValid(password) {
+            errorMessage = "Password must meet requirements."
+            return
+        }
+        
+        if password != confirmPassword {
+            errorMessage = "Passwords do not match."
+            return
+        }
+        
+        // Simulate success (Replace with real backend call)
+        isLoggedIn = true
+    }
+    
+    private func isValidEmail(_ email: String) -> Bool {
+        let emailRegex = "^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$"
+        return NSPredicate(format: "SELF MATCHES %@", emailRegex).evaluate(with: email)
+    }
+    
+    private func isPasswordValid(_ password: String) -> Bool {
+        let passwordRegex = "^(?=.*[0-9])(?=.*[!@#$%^&*])[A-Za-z0-9!@#$%^&*]{8,15}$"
+        return NSPredicate(format: "SELF MATCHES %@", passwordRegex).evaluate(with: password)
+    }
+    
+    private func validatePassword(_ password: String) {
+        if !isPasswordValid(password) {
+            passwordMessage = "Password must be 8-15 characters, include 1 number, and 1 special character."
+        } else {
+            passwordMessage = ""
+        }
     }
 }
-
-
-
 
 struct SignupView_Previews: PreviewProvider {
     static var previews: some View {
