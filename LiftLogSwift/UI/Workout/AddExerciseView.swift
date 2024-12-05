@@ -12,12 +12,14 @@ struct AddExerciseView: View {
     @Environment(\.presentationMode) var presentationMode
     @ObservedObject var routineStore: RoutineStore
     @Binding var routine: Routine
-    @State private var exerciseName = ""
-    @State private var duration = ""
-    @State private var selectedIcon = "figure.strengthtraining.traditional"
+    @State private var exerciseName: String
+    @State private var duration: String
+    @State private var selectedIcon: String
     @State private var isIconGridExpanded = false
+    let editMode: Bool
+    let exerciseId: UUID?
     
-    let icons = [
+      let icons = [
         "figure.strengthtraining.traditional",
         "figure.strengthtraining.functional",
         "figure.highintensity.intervaltraining",
@@ -40,47 +42,80 @@ struct AddExerciseView: View {
         "heart.circle.fill"
     ]
     
+    init(routineStore: RoutineStore, routine: Binding<Routine>, exercise: Exercise? = nil) {
+        self.routineStore = routineStore
+        self._routine = routine
+        self.editMode = exercise != nil
+        self.exerciseId = exercise?.id
+        _exerciseName = State(initialValue: exercise?.name ?? "")
+        _selectedIcon = State(initialValue: exercise?.icon ?? "figure.strengthtraining.traditional")
+        
+        // Extract minutes from duration string
+        if let exercise = exercise {
+            let durationParts = exercise.duration.split(separator: " ")
+            _duration = State(initialValue: String(durationParts[0]))
+        } else {
+            _duration = State(initialValue: "")
+        }
+    }
+    
+    private func saveExercise() {
+        if !exerciseName.isEmpty && !duration.isEmpty {
+            let exercise = Exercise(
+                id: exerciseId ?? UUID(),
+                name: exerciseName,
+                duration: "\(duration) Mins",
+                icon: selectedIcon
+            )
+            
+            if editMode {
+                if let index = routine.exercises.firstIndex(where: { $0.id == exercise.id }) {
+                    routine.exercises[index] = exercise
+                    routineStore.updateRoutine(routine)
+                }
+            } else {
+                routine.exercises.append(exercise)
+                routineStore.updateRoutine(routine)
+            }
+            presentationMode.wrappedValue.dismiss()
+        }
+    }
+    
     var body: some View {
         NavigationView {
             ScrollView {
                 VStack(spacing: 24) {
+                    // Exercise Name Field
                     VStack(alignment: .leading, spacing: 8) {
                         Text("Exercise Name")
                             .font(.title2)
                             .bold()
-                        
-                        TextField("Bulgarian Split Squats", text: $exerciseName)
+                        TextField("Exercise name", text: $exerciseName)
                             .padding()
-                            .background(
-                                RoundedRectangle(cornerRadius: 10)
-                                    .stroke(Color.gray.opacity(0.3), lineWidth: 1)
-                            )
+                            .background(Color.gray.opacity(0.1))
+                            .cornerRadius(10)
                     }
                     
+                    // Duration Field
                     VStack(alignment: .leading, spacing: 8) {
-                        Text("Duration")
+                        Text("Duration (minutes)")
                             .font(.title2)
                             .bold()
-                        
-                        TextField("15 Mins", text: $duration)
+                        TextField("Enter duration", text: $duration)
+                            .keyboardType(.numberPad)
                             .padding()
-                            .background(
-                                RoundedRectangle(cornerRadius: 10)
-                                    .stroke(Color.gray.opacity(0.3), lineWidth: 1)
-                            )
+                            .background(Color.gray.opacity(0.1))
+                            .cornerRadius(10)
                     }
                     
+                    // Icon Selection
                     VStack(alignment: .leading, spacing: 8) {
-                        Button(action: {
-                            withAnimation {
-                                isIconGridExpanded.toggle()
-                            }
-                        }) {
-                            HStack {
-                                Text("Icon")
-                                    .font(.title2)
-                                    .bold()
-                                Spacer()
+                        HStack {
+                            Text("Icon")
+                                .font(.title2)
+                                .bold()
+                            Spacer()
+                            Button(action: { isIconGridExpanded.toggle() }) {
                                 Image(systemName: isIconGridExpanded ? "chevron.up" : "chevron.down")
                                     .foregroundColor(.gray)
                             }
@@ -96,64 +131,42 @@ struct AddExerciseView: View {
                                 ForEach(icons, id: \.self) { icon in
                                     Button(action: {
                                         selectedIcon = icon
+                                        isIconGridExpanded = false
                                     }) {
-                                        VStack {
-                                            Image(systemName: icon)
-                                                .font(.system(size: 30))
-                                                .frame(width: 60, height: 60)
-                                                .background(selectedIcon == icon ? Color.gray.opacity(0.2) : Color.clear)
-                                                .clipShape(RoundedRectangle(cornerRadius: 10))
-                                        }
+                                        Image(systemName: icon)
+                                            .font(.system(size: 30))
+                                            .frame(width: 60, height: 60)
+                                            .background(selectedIcon == icon ? Color.orange.opacity(0.2) : Color.clear)
+                                            .clipShape(RoundedRectangle(cornerRadius: 10))
                                     }
-                                    .foregroundColor(.black)
                                 }
                             }
-                            .padding()
-                            .background(
-                                RoundedRectangle(cornerRadius: 10)
-                                    .stroke(Color.gray.opacity(0.3), lineWidth: 1)
-                            )
                         }
-                    }
-                    
-                    Button(action: {
-                        if !exerciseName.isEmpty {
-                            let newExercise = Exercise(
-                                name: exerciseName,
-                                duration: duration.isEmpty ? "15 Mins" : duration,
-                                icon: selectedIcon
-                            )
-                            routineStore.addExercise(to: routine.id, exercise: newExercise)
-                            presentationMode.wrappedValue.dismiss()
+                        
+                        // Selected Icon Preview
+                        HStack {
+                            Image(systemName: selectedIcon)
+                                .font(.system(size: 30))
+                                .foregroundColor(.orange)
+                                .frame(width: 60, height: 60)
+                                .background(Color.orange.opacity(0.2))
+                                .clipShape(RoundedRectangle(cornerRadius: 10))
+                            Text("Selected Icon")
+                                .foregroundColor(.gray)
                         }
-                    }) {
-                        Text("Add Exercise")
-                            .font(.headline)
-                            .bold()
-                            .frame(maxWidth: .infinity)
-                            .padding()
-                            .background(
-                                LinearGradient(
-                                    gradient: Gradient(colors: [.red, .orange]),
-                                    startPoint: .leading,
-                                    endPoint: .trailing
-                                )
-                            )
-                            .foregroundColor(.white)
-                            .cornerRadius(20)
                     }
                 }
                 .padding()
             }
-            .navigationTitle("Add Exercise")
+            .navigationTitle(editMode ? "Edit Exercise" : "Add Exercise")
             .navigationBarItems(
-                leading: Button(action: {
+                leading: Button("Cancel") {
                     presentationMode.wrappedValue.dismiss()
-                }) {
-                    Image(systemName: "xmark")
-                        .font(.title2)
-                        .foregroundColor(.black)
+                },
+                trailing: Button(editMode ? "Save" : "Add") {
+                    saveExercise()
                 }
+                .disabled(exerciseName.isEmpty || duration.isEmpty)
             )
         }
     }

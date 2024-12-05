@@ -23,6 +23,11 @@ struct WorkoutSessionView: View {
     @State private var isPaused = false
     @State private var showSkipAlert = false
     @State private var completedExercises: [WorkoutSession.ExerciseSession] = []
+    @State private var showEndWorkoutAlert = false
+    @State private var showNextExerciseAlert = false
+    @State private var showHydrationReminder = false
+    @State private var lastHydrationReminder = Date()
+    @State private var showNextExerciseSheet = false
     
     struct Set: Identifiable {
         let id = UUID()
@@ -103,82 +108,109 @@ struct WorkoutSessionView: View {
             
             VStack {
                 if showStartPrompt {
+                    ExercisePreviewSheet(
+                        exercise: currentExercise,
+                        buttonText: "Begin Exercise",
+                        buttonAction: {
+                            showStartPrompt = false
+                            isCountingDown = true
+                        },
+                        showCancelButton: false,
+                        onCancel: {}
+                    )
+                } else if isCountingDown {
                     VStack(spacing: 20) {
-                        Text(currentExercise.name)
-                            .font(.title)
-                            .bold()
+                        // Header with exercise name and icon
+                        VStack(spacing: 15) {
+                            Text("GET READY!")
+                                .font(.system(size: 32, weight: .bold))
+                                .foregroundColor(.orange)
+                            
+                            Text(currentExercise.name)
+                                .font(.system(size: 24, weight: .bold))
+                                .multilineTextAlignment(.center)
+                            
+                            Image(systemName: currentExercise.icon)
+                                .font(.system(size: 60))
+                                .foregroundColor(.orange)
+                                .padding()
+                                .background(
+                                    Circle()
+                                        .fill(Color.orange.opacity(0.2))
+                                        .frame(width: 120, height: 120)
+                                )
+                        }
+                        .padding(.top, 20)
                         
-                        Image(systemName: currentExercise.icon)
-                            .font(.system(size: 100))
-                            .padding(.top, 30)
-                        
-                        VStack(alignment: .leading, spacing: 10) {
-                            HStack {
-                                Image(systemName: "clock")
-                                Text(currentExercise.duration)
-                            }
-                            HStack {
-                                Image(systemName: "flame")
-                                Text(currentExercise.calories)
+                        // Countdown timer card
+                        VStack(spacing: 15) {
+                            Text("\(exerciseTimeRemaining)")
+                                .font(.system(size: 80, weight: .bold))
+                                .monospacedDigit()
+                                .foregroundColor(.orange)
+                                .frame(width: 150, height: 150)
+                                .background(
+                                    Circle()
+                                        .fill(Color.orange.opacity(0.1))
+                                )
+                            
+                            // Exercise info
+                            HStack(spacing: 30) {
+                                VStack {
+                                    Image(systemName: "clock.fill")
+                                        .font(.system(size: 22))
+                                        .foregroundColor(.orange)
+                                    Text(currentExercise.duration)
+                                        .font(.subheadline)
+                                        .foregroundColor(.gray)
+                                }
+                                
+                                VStack {
+                                    Image(systemName: "flame.fill")
+                                        .font(.system(size: 22))
+                                        .foregroundColor(.orange)
+                                    Text(currentExercise.calories)
+                                        .font(.subheadline)
+                                        .foregroundColor(.gray)
+                                }
                             }
                         }
-                        .padding(.top, 30)
+                        .padding(.vertical, 20)
+                        .padding(.horizontal, 30)
+                        .background(
+                            RoundedRectangle(cornerRadius: 20)
+                                .fill(Color.white)
+                                .shadow(color: .gray.opacity(0.2), radius: 10)
+                        )
+                        .padding(.horizontal)
                         
                         Spacer()
                         
+                        // Skip button
                         Button(action: {
-                            showStartPrompt = false
-                            isCountingDown = true
+                            isCountingDown = false
+                            exerciseTimeRemaining = 0
                         }) {
-                            Text("Begin Exercise")
-                                .font(.headline)
-                                .bold()
-                                .frame(maxWidth: .infinity)
-                                .padding()
-                                .background(
-                                    LinearGradient(
-                                        gradient: Gradient(colors: [.red, .orange]),
-                                        startPoint: .leading,
-                                        endPoint: .trailing
-                                    )
+                            HStack {
+                                Text("Skip")
+                                    .font(.title3)
+                                    .bold()
+                                Image(systemName: "forward.fill")
+                                    .font(.title3)
+                            }
+                            .frame(maxWidth: .infinity)
+                            .padding()
+                            .background(
+                                LinearGradient(
+                                    gradient: Gradient(colors: [.orange, .red]),
+                                    startPoint: .leading,
+                                    endPoint: .trailing
                                 )
-                                .foregroundColor(.white)
-                                .cornerRadius(20)
+                            )
+                            .foregroundColor(.white)
+                            .cornerRadius(20)
                         }
                         .padding(.horizontal)
-                    }
-                } else if isCountingDown {
-                    // Countdown View
-                    VStack(spacing: 20) {
-                        Text("GET READY!")
-                            .font(.system(size: 40, weight: .bold))
-                        
-                        Text("\(exerciseTimeRemaining)")
-                            .font(.system(size: 80, weight: .bold))
-                        
-                        Text(currentExercise.name)
-                            .font(.title)
-                            .bold()
-                        
-                        Image(systemName: currentExercise.icon)
-                            .font(.system(size: 100))
-                            .padding(.top, 30)
-                        
-                        VStack(alignment: .leading, spacing: 10) {
-                            HStack {
-                                Image(systemName: "clock")
-                                Text("\(currentExercise.duration)")
-                            }
-                            HStack {
-                                Image(systemName: "flame")
-                                Text("\(currentExercise.calories)")
-                            }
-                            HStack {
-                                Image(systemName: "figure.run")
-                                Text("4 Sets")
-                            }
-                        }
-                        .padding(.top, 30)
                     }
                 } else {
                     VStack(spacing: 20) {
@@ -297,38 +329,50 @@ struct WorkoutSessionView: View {
                         
                         if !isLastExercise {
                             Button(action: {
-                                saveCurrentExercise()
-                                
-                                // Reset states for next exercise
-                                currentExerciseIndex += 1
-                                exerciseTimeRemaining = 5
-                                showStartPrompt = true
-                                sets = [Set(reps: "", weight: "")]
-                                // Note: We're not resetting workoutDuration here
-                                isPaused = false
-                                showSkipAlert = false
+                                showNextExerciseSheet = true
                             }) {
-                                Text("Next Exercise")
-                                    .font(.headline)
-                                    .bold()
-                                    .frame(maxWidth: .infinity)
-                                    .padding()
-                                    .background(
-                                        LinearGradient(
-                                            gradient: Gradient(colors: [.red, .orange]),
-                                            startPoint: .leading,
-                                            endPoint: .trailing
-                                        )
+                                HStack {
+                                    Text("Next Exercise")
+                                        .font(.title3)
+                                        .bold()
+                                    Image(systemName: "arrow.right")
+                                        .font(.title3)
+                                }
+                                .frame(maxWidth: .infinity)
+                                .padding()
+                                .background(
+                                    LinearGradient(
+                                        gradient: Gradient(colors: [.orange, .red]),
+                                        startPoint: .leading,
+                                        endPoint: .trailing
                                     )
-                                    .foregroundColor(.white)
-                                    .cornerRadius(20)
+                                )
+                                .foregroundColor(.white)
+                                .cornerRadius(20)
                             }
                             .padding(.horizontal)
+                            .sheet(isPresented: $showNextExerciseSheet) {
+                                ExercisePreviewSheet(
+                                    exercise: routine.exercises[currentExerciseIndex + 1],
+                                    buttonText: "Begin Next Exercise",
+                                    buttonAction: {
+                                        saveCurrentExercise()
+                                        currentExerciseIndex += 1
+                                        exerciseTimeRemaining = 5
+                                        showStartPrompt = false
+                                        isCountingDown = true
+                                        sets = [Set(reps: "", weight: "")]
+                                        isPaused = false
+                                        showNextExerciseSheet = false
+                                    },
+                                    showCancelButton: true,
+                                    onCancel: { showNextExerciseSheet = false }
+                                )
+                            }
                         }
                         
                         Button(action: {
-                            saveCurrentExercise()
-                            finishWorkout()
+                            showEndWorkoutAlert = true
                         }) {
                             Text("End Workout")
                                 .font(.headline)
@@ -346,6 +390,15 @@ struct WorkoutSessionView: View {
                                 .cornerRadius(20)
                         }
                         .padding(.horizontal)
+                        .alert("End Workout?", isPresented: $showEndWorkoutAlert) {
+                            Button("Cancel", role: .cancel) { }
+                            Button("End Workout", role: .destructive) {
+                                saveCurrentExercise()
+                                finishWorkout()
+                            }
+                        } message: {
+                            Text("Are you sure you want to end this workout? \nThis action cannot be undone.")
+                        }
                     }
                 }
             }
@@ -408,6 +461,11 @@ struct WorkoutSessionView: View {
                 }
             } else if !isPaused {
                 workoutDuration += 1
+                
+                // Show hydration reminder every 30 seconds (for testing)
+                if workoutDuration % 30 == 0 && workoutDuration > 0 {
+                    showHydrationReminder = true
+                }
             }
         }
         .navigationBarItems(
@@ -419,12 +477,147 @@ struct WorkoutSessionView: View {
                     .foregroundColor(.black)
             }
         )
+        .alert("Reminder to Hydrate 💧", isPresented: $showHydrationReminder) {
+            Button("Done") {
+                showHydrationReminder = false
+            }
+        } message: {
+            Text("Don't forget to drink water in between sets!")
+        }
     }
 }
 
 extension Array {
     subscript(safe index: Index) -> Element? {
         return indices.contains(index) ? self[index] : nil
+    }
+}
+
+struct ExercisePreviewSheet: View {
+    let exercise: Exercise
+    let buttonText: String
+    let buttonAction: () -> Void
+    let showCancelButton: Bool
+    let onCancel: () -> Void
+    
+    var body: some View {
+        VStack(spacing: 15) {
+            // Header with exercise name and icon
+            VStack(spacing: 12) {
+                Text(exercise.name)
+                    .font(.system(size: 24, weight: .bold))
+                    .multilineTextAlignment(.center)
+                
+                Image(systemName: exercise.icon)
+                    .font(.system(size: 45))
+                    .foregroundColor(.orange)
+                    .padding()
+                    .background(
+                        Circle()
+                            .fill(Color.orange.opacity(0.2))
+                            .frame(width: 90, height: 90)
+                    )
+            }
+            .padding(.top, 15)
+            
+            // Exercise details card
+            VStack(spacing: 12) {
+                HStack(spacing: 25) {
+                    // Duration info
+                    VStack {
+                        Image(systemName: "clock.fill")
+                            .font(.system(size: 20))
+                            .foregroundColor(.orange)
+                        Text(exercise.duration)
+                            .font(.subheadline)
+                            .foregroundColor(.gray)
+                    }
+                    
+                    // Calories info
+                    VStack {
+                        Image(systemName: "flame.fill")
+                            .font(.system(size: 20))
+                            .foregroundColor(.orange)
+                        Text(exercise.calories)
+                            .font(.subheadline)
+                            .foregroundColor(.gray)
+                    }
+                    
+                    // Sets info
+                    VStack {
+                        Image(systemName: "figure.strengthtraining.traditional")
+                            .font(.system(size: 20))
+                            .foregroundColor(.orange)
+                        Text("4 Sets")
+                            .font(.subheadline)
+                            .foregroundColor(.gray)
+                    }
+                }
+                
+                // Target Muscles
+                VStack(spacing: 8) {
+                    Text("Target Muscles")
+                        .font(.headline)
+                        .foregroundColor(.gray)
+                    HStack(spacing: 10) {
+                        ForEach(["Quads", "Glutes", "Core"], id: \.self) { muscle in
+                            Text(muscle)
+                                .font(.caption)
+                                .padding(.horizontal, 12)
+                                .padding(.vertical, 6)
+                                .background(Color.orange.opacity(0.1))
+                                .cornerRadius(15)
+                        }
+                    }
+                }
+            }
+            .padding(.vertical, 15)
+            .padding(.horizontal, 20)
+            .background(
+                RoundedRectangle(cornerRadius: 15)
+                    .fill(Color.white)
+                    .shadow(color: .gray.opacity(0.2), radius: 8)
+            )
+            .padding(.horizontal)
+            
+            // Buttons
+            VStack(spacing: 10) {
+                Button(action: buttonAction) {
+                    HStack {
+                        Text(buttonText)
+                            .font(.title3)
+                            .bold()
+                        Image(systemName: "arrow.right")
+                            .font(.title3)
+                    }
+                    .frame(maxWidth: .infinity)
+                    .padding()
+                    .background(
+                        LinearGradient(
+                            gradient: Gradient(colors: [.orange, .red]),
+                            startPoint: .leading,
+                            endPoint: .trailing
+                        )
+                    )
+                    .foregroundColor(.white)
+                    .cornerRadius(15)
+                }
+                
+                if showCancelButton {
+                    Button(action: onCancel) {
+                        Text("Cancel")
+                            .font(.headline)
+                            .frame(maxWidth: .infinity)
+                            .padding()
+                            .background(Color.gray.opacity(0.1))
+                            .foregroundColor(.gray)
+                            .cornerRadius(15)
+                    }
+                }
+            }
+            .padding(.horizontal)
+        }
+        .presentationDetents([.height(500)])
     }
 }
 

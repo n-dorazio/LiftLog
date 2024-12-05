@@ -81,6 +81,14 @@ class RoutineStore: ObservableObject {
             saveRoutines()
         }
     }
+    
+    func updateRoutine(_ routine: Routine) {
+        if let index = routines.firstIndex(where: { $0.id == routine.id }) {
+            routines[index] = routine
+            saveRoutines()
+            objectWillChange.send()
+        }
+    }
 }
 
 

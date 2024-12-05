@@ -57,43 +57,77 @@ struct WorkoutExerciseCard: View {
     let exercise: Exercise
     
     var body: some View {
-        VStack(spacing: 16) {
+        VStack(spacing: 20) {
+            // Header with exercise name
             HStack {
                 Text(exercise.name)
-                    .font(.title2)
-                    .bold()
+                    .font(.system(size: 24, weight: .bold))
                 Spacer()
                 Image(systemName: "pencil")
-                    .foregroundColor(.black)
+                    .foregroundColor(.orange)
             }
             
-            HStack {
+            // Icon with stats
+            HStack(spacing: 30) {
                 Image(systemName: exercise.icon)
-                    .font(.system(size: 60))
+                    .font(.system(size: 50))
+                    .foregroundColor(.orange)
+                    .padding()
+                    .background(
+                        Circle()
+                            .fill(Color.orange.opacity(0.2))
+                            .frame(width: 100, height: 100)
+                    )
+                
                 Spacer()
-                VStack(alignment: .trailing, spacing: 8) {
+                
+                // Stats
+                VStack(alignment: .trailing, spacing: 12) {
                     HStack {
-                        Image(systemName: "clock")
+                        Image(systemName: "clock.fill")
+                            .font(.system(size: 18))
+                            .foregroundColor(.orange)
                         Text(exercise.duration)
+                            .font(.subheadline)
+                            .foregroundColor(.gray)
                     }
                     HStack {
-                        Image(systemName: "flame")
+                        Image(systemName: "flame.fill")
+                            .font(.system(size: 18))
+                            .foregroundColor(.orange)
                         Text(exercise.calories)
+                            .font(.subheadline)
+                            .foregroundColor(.gray)
                     }
                 }
             }
             
+            // Start Button
             Button(action: {}) {
-                Text("Start")
-                    .frame(maxWidth: .infinity)
-                    .padding()
-                    .background(Color.white)
-                    .cornerRadius(10)
+                HStack {
+                    Text("Start Exercise")
+                        .font(.title3)
+                        .bold()
+                    Image(systemName: "arrow.right")
+                        .font(.title3)
+                }
+                .frame(maxWidth: .infinity)
+                .padding()
+                .background(
+                    LinearGradient(
+                        gradient: Gradient(colors: [.orange, .red]),
+                        startPoint: .leading,
+                        endPoint: .trailing
+                    )
+                )
+                .foregroundColor(.white)
+                .cornerRadius(20)
             }
         }
         .padding()
-        .background(Color.gray.opacity(0.1))
+        .background(Color.white)
         .cornerRadius(20)
+        .shadow(color: .gray.opacity(0.1), radius: 10)
     }
 }
 
