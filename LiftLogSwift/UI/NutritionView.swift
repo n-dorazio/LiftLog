@@ -4,17 +4,46 @@
 ////
 ////  Created by Nathaniel D'Orazio on 2024-11-21.
 ////
-//
+
+
+
 import SwiftUI
 
 struct NutritionView: View {
+    @State private var selectedDate = Date()  // State for the selected date
+    @State private var showCalendar = false   // State for showing the calendar popup
+    
     var body: some View {
         NavigationView {
             ScrollView {
                 VStack(spacing: 20) {
+                    // Title and Calendar Toggle Button
+                    HStack {
+                        Text("Nutrition")
+                            .font(.largeTitle)
+                            .fontWeight(.bold)
+                        
+                        Spacer()
+                        
+                        // Calendar Toggle Button
+                        Button(action: {
+                            withAnimation {
+                                showCalendar.toggle()
+                            }
+                        }) {
+                            Image(systemName: "calendar")
+                                .font(.title2)
+                                .foregroundColor(.black)
+                                .padding(12)
+                                .background(Circle().fill(Color.white))
+                                .shadow(color: .gray.opacity(0.2), radius: 5)
+                        }
+                    }
+                    .padding(.top)
+                    
                     // Calories Progress
                     CaloriesCard(
-                        consumed: 1865,
+                        consumed: 1883,
                         goal: 2500
                     )
                     
@@ -36,9 +65,35 @@ struct NutritionView: View {
                     .padding(.top)
                 }
                 .padding()
-                .navigationTitle("Nutrition")
-                .navigationBarTitleDisplayMode(.inline) // Optional: makes title inline
             }
+        }
+        // Calendar Popup
+        if showCalendar {
+            VStack {
+                CalendarView(selectedDate: $selectedDate) {
+                    withAnimation {
+                        showCalendar = false
+                    }
+                }
+                .background(
+                    Color.white
+                        .cornerRadius(20)
+                        .shadow(radius: 10)
+                )
+                .padding()
+                .transition(.scale(scale: 0.95))
+                
+                Spacer()
+            }
+            .background(
+                Color.black.opacity(0.3)
+                    .edgesIgnoringSafeArea(.all)
+                    .onTapGesture {
+                        withAnimation {
+                            showCalendar.toggle()
+                        }
+                    }
+            )
         }
     }
 }
@@ -67,7 +122,6 @@ struct CaloriesCard: View {
     }
 }
 
-// MealCard struct is declared here
 //struct MealCard: View {
 //    let mealType: String
 //    let calories: String
@@ -94,9 +148,63 @@ struct CaloriesCard: View {
 //    }
 //}
 
-#Preview{
-        NutritionView()
+struct CalendarView: View {
+    @Binding var selectedDate: Date
+    var onClose: (() -> Void)? // Closure to handle the close action
+    
+    var body: some View {
+        VStack {
+            // Header with close button
+            HStack {
+                Text("Select a Date")
+                    .font(.system(size: 25, weight: .bold))
+                    .padding()
+                
+                Spacer()
+                
+                // Close button
+                Button(action: {
+                    onClose?()
+                }) {
+                    Image(systemName: "xmark.circle.fill")
+                        .font(.title2)
+                        .foregroundColor(.gray)
+                }
+                .padding()
+            }
+            
+            // Date Picker
+            DatePicker(
+                "Date",
+                selection: $selectedDate,
+                displayedComponents: [.date]
+            )
+            .datePickerStyle(GraphicalDatePickerStyle())
+            .padding()
+            
+            Spacer()
+            
+            // Done Button
+            Button(action: {
+                onClose?()
+            }) {
+                Text("Done")
+                    .fontWeight(.bold)
+                    .frame(maxWidth: .infinity)
+                    .padding()
+                    .background(Capsule().fill(Color.orange))
+                    .foregroundColor(.white)
+                    .padding()
+            }
+        }
+        .padding()
+        .frame(height: 525)
     }
+}
 
 
 
+
+#Preview {
+    NutritionView()
+}
