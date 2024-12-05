@@ -47,6 +47,18 @@ struct NutritionView: View {
                         goal: 2500
                     )
                     
+                    // Meal Creation Button (NavigationLink)
+                    NavigationLink(destination: NewMealView()) {
+                        Text("Create New Meal")
+                            .font(.title2)
+                            .fontWeight(.bold)
+                            .frame(maxWidth: .infinity)
+                            .padding()
+                            .background(Capsule().fill(Color.orange))
+                            .foregroundColor(.white)
+                            .shadow(color: .gray.opacity(0.3), radius: 5)
+                    }
+                    
                     // Meals List
                     VStack(alignment: .leading, spacing: 15) {
                         Text("Today's Meals")
@@ -67,6 +79,7 @@ struct NutritionView: View {
                 .padding()
             }
         }
+        
         // Calendar Popup
         if showCalendar {
             VStack {
@@ -122,6 +135,90 @@ struct CaloriesCard: View {
     }
 }
 
+// New Meal View (Page)
+struct NewMealView: View {
+    @State private var mealTitle = ""
+    @State private var protein = ""
+    @State private var calories = ""
+    @State private var fats = ""
+    @State private var carbs = ""
+    @State private var mealDescription = ""
+    
+    var body: some View {
+        VStack {
+            // Header
+            HStack {
+                Text("Create a New Meal")
+                    .font(.title)
+                    .fontWeight(.bold)
+                    .padding()
+                
+                Spacer()
+            }
+            
+            // Meal Title Text Field
+            TextField("Meal Title", text: $mealTitle)
+                .textFieldStyle(RoundedBorderTextFieldStyle())
+                .padding()
+            
+            // Calories Text Field
+            TextField("Calories", text: $calories)
+                .keyboardType(.numberPad)
+                .textFieldStyle(RoundedBorderTextFieldStyle())
+                .padding()
+            
+            // Protein Text Field
+            TextField("Protein (g)", text: $protein)
+                .keyboardType(.decimalPad)
+                .textFieldStyle(RoundedBorderTextFieldStyle())
+                .padding()
+            
+            // Fats Text Field
+            TextField("Fats (g)", text: $fats)
+                .keyboardType(.decimalPad)
+                .textFieldStyle(RoundedBorderTextFieldStyle())
+                .padding()
+            
+            // Carbs Text Field
+            TextField("Carbs (g)", text: $carbs)
+                .keyboardType(.decimalPad)
+                .textFieldStyle(RoundedBorderTextFieldStyle())
+                .padding()
+            
+            // Meal Description TextEditor
+            TextEditor(text: $mealDescription)
+                .frame(width:375, height: 150)
+                .background(Color.gray.opacity(0.1))
+                .cornerRadius(10)
+                .overlay(
+                    RoundedRectangle(cornerRadius: 10)
+                        .stroke(Color.gray, lineWidth: 1)
+                )
+                .padding(.bottom)
+            
+            
+            // Save Button
+            Button(action: {
+                // Add functionality to save the new meal
+                //print("Meal Saved: \(mealTitle), Protein: \(protein)g, Calories: \(calories) kcal, Fats: \(fats)g, Carbs: \(carbs)g, Description : \(mealDescription)")
+            }) {
+                Text("Save Meal")
+                    .fontWeight(.bold)
+                    .frame(maxWidth: .infinity)
+                    .padding()
+                    .background(Capsule().fill(Color.orange))
+                    .foregroundColor(.white)
+                    .padding()
+            }
+            .padding(.top)
+            
+            Spacer()
+        }
+    }
+}
+
+
+//
 //struct MealCard: View {
 //    let mealType: String
 //    let calories: String
@@ -201,9 +298,6 @@ struct CalendarView: View {
         .frame(height: 525)
     }
 }
-
-
-
 
 #Preview {
     NutritionView()
