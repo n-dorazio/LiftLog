@@ -202,7 +202,6 @@ struct ProfileView: View {
     @StateObject private var userProfile = UserProfileModel()
 
     var body: some View {
-        NavigationView {
             ScrollView {
                 VStack(spacing: 24) {
                     // Profile Header
@@ -306,7 +305,6 @@ struct ProfileView: View {
                     }
                     .padding(.horizontal)
                 }
-            }
         .sheet(isPresented: $showSettings) {
             SettingsView(userProfile: userProfile)
         }
