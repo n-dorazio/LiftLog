@@ -9,19 +9,39 @@ import SwiftUI
 
 struct EditWeightView: View {
     @Environment(\.presentationMode) var presentationMode
-    @ObservedObject var userProfile: UserProfileModel
+    @ObservedObject var settings: SettingsStore
+    @State private var weightInput: String = ""
+    
     var body: some View {
-        HStack {
+        VStack {
+            Text("Edit Weight")
+                .font(.title)
+                .bold()
+                .padding()
+            
+            TextField("Enter your weight", text: $weightInput)
+                .keyboardType(.numberPad)
+                .padding()
+                .textFieldStyle(RoundedBorderTextFieldStyle())
+            
             Button(action: {
+                settings.weight = weightInput
                 presentationMode.wrappedValue.dismiss()
             }) {
-                Image(systemName: "chevron.left")
-                    .font(.title2)
+                Text("Save")
+                    .frame(maxWidth: .infinity)
+                    .padding()
+                    .background(Color.blue)
+                    .foregroundColor(.white)
+                    .cornerRadius(10)
             }
+            .padding()
+            
             Spacer()
         }
-        .padding(.horizontal)
-        Text(/*@START_MENU_TOKEN@*/"Hello, World!"/*@END_MENU_TOKEN@*/)
+        .onAppear {
+            weightInput = settings.weight
+        }
     }
 }
 

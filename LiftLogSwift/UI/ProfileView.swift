@@ -200,6 +200,7 @@ struct ProfileView: View {
     @State private var showAddFriends = false
     @State private var showFriendsList = false
     @StateObject private var userProfile = UserProfileModel()
+    @StateObject private var settingsStore = SettingsStore()
 
     var body: some View {
             ScrollView {
@@ -305,9 +306,9 @@ struct ProfileView: View {
                     }
                     .padding(.horizontal)
                 }
-        .sheet(isPresented: $showSettings) {
-            SettingsView(userProfile: userProfile)
-        }
+            .sheet(isPresented: $showSettings) {
+                SettingsView(userProfile: userProfile, settings: settingsStore)
+            }
         .sheet(isPresented: $showAddFriends) {
             AddFriendsView(friends: $userProfile.friends)
         }
