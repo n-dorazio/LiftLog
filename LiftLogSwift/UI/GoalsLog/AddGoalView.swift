@@ -9,9 +9,7 @@ import SwiftUI
 
 struct AddGoalView: View {
     @Environment(\.presentationMode) var presentationMode
-    //@ObservedObject var goalStore: GoalStore
     @State private var goalType = "Weight Loss"
-    @State private var customGoalType = ""
     @State private var goalUnit = "Lbs"
     @State private var customGoalUnit = "..."
     @State private var targetWeight = ""
@@ -20,6 +18,7 @@ struct AddGoalView: View {
     @State private var isEmpty = true
     @State private var isFull = false
     @Binding public var goals: [Goal]
+    @State private var goalName = ""
     
     let goalTypes = ["Weight Loss", "Muscle Gain", "Strength", "Endurance", "Custom"]
     let goalUnits = ["Lbs", "kgs", "in.", "cm", "km", "cal.", "steps", "minutes", "hours", "custom"]
@@ -28,26 +27,19 @@ struct AddGoalView: View {
         NavigationView {
             Form {
                 // Goal Type Section
-                Section(header: Text("Goal Type")) {
+                Section(header: Text("Goal Type").foregroundColor(.orange)) {
                     Picker("Goal Type", selection: $goalType) {
                         ForEach(goalTypes, id: \.self) { type in
                             Text(type).tag(type)
                         }
                     }
+                    
+                    TextField("Goal Name", text: $goalName)
+                        .textInputAutocapitalization(.words)
                 }
                 
-                if goalType == "Custom" {
-                    // Target Weight Section
-                    Section(header: Text("Custom Goal Type")) {
-                        HStack {
-                            TextField("Enter name here", text: $customGoalType)
-                                .keyboardType(.decimalPad)
-                        }
-                    }
-                }
-            
                 // Target Metric Section
-                Section(header: Text("Goal Target")) {
+                Section(header: Text("Goal Target").foregroundColor(.orange)) {
                     Picker("Units", selection: $goalUnit) {
                         ForEach(goalUnits, id: \.self) { type in
                             Text(type).tag(type)
@@ -56,7 +48,6 @@ struct AddGoalView: View {
                     if goalUnit == "custom" {
                         HStack {
                             TextField("Enter desired units", text: $customGoalUnit)
-                                .keyboardType(.decimalPad)
                             Text("Custom units")
                                 .foregroundColor(.gray)
                         }
@@ -80,14 +71,14 @@ struct AddGoalView: View {
                 }
                 
                 // Deadline Section
-                Section(header: Text("Deadline")) {
+                Section(header: Text("Deadline").foregroundColor(.orange)) {
                     DatePicker("", selection: $deadline, displayedComponents: .date)
                         .datePickerStyle(CompactDatePickerStyle())
                         .labelsHidden()
                 }
                 
                 // Notes Section
-                Section(header: Text("Notes")) {
+                Section(header: Text("Notes").foregroundColor(.orange)) {
                     TextEditor(text: $notes)
                         .frame(height: 100)
                 }
@@ -102,17 +93,21 @@ struct AddGoalView: View {
                         .frame(maxWidth: .infinity)
                         .foregroundColor(.white)
                     }
-                    .listRowBackground(Color.orange)
+                    .listRowBackground(
+                        LinearGradient(
+                            gradient: Gradient(colors: [.orange, .red]),
+                            startPoint: .leading,
+                            endPoint: .trailing
+                        )
+                    )
                 }
             }
             .navigationTitle("Set New Goal")
             .navigationBarItems(
                 leading: Button("Cancel") {
-                    newGoalIsEmpty(goalType: goalType, customGoalType: customGoalType, goalUnit: goalUnit, customGoalUnit: customGoalUnit, targetWeight: targetWeight, deadline: deadline, notes: notes, isEmpty: isEmpty)
+                    newGoalIsEmpty(goalType: goalType, goalUnit: goalUnit, customGoalUnit: customGoalUnit, targetWeight: targetWeight, deadline: deadline, notes: notes, isEmpty: isEmpty)
                     if !isEmpty {
-                        //print("is not empty again")
                         print("TODO: INSERT A CONFIRMATION SCREEN THAT ALL UNSAVED INFO WILL BE LOST")
-                        // TODO: INSERT A CONFIRMATION SCREEN THAT ALL UNSAVED INFO WILL BE LOST
                     }
                     presentationMode.wrappedValue.dismiss()
                 }
@@ -121,68 +116,71 @@ struct AddGoalView: View {
     }
     
     private func saveGoal() {
-        newGoalIsFilled(goalType: goalType, customGoalType: customGoalType, goalUnit: goalUnit, customGoalUnit: customGoalUnit, targetWeight: targetWeight, deadline: deadline, notes: notes, isFull: isFull)
+        newGoalIsFilled(goalType: goalType, goalName: goalName, goalUnit: goalUnit, customGoalUnit: customGoalUnit, targetWeight: targetWeight, deadline: deadline, notes: notes, isFull: isFull)
         
         if isFull {
             let gs = GoalStore(internalGoals: &goals)
             gs.addGoal(
                 type: goalType,
+                name: goalName,
                 targetWeight: Double(targetWeight) ?? 0,
                 deadline: deadline,
-                notes: notes
+                notes: notes,
+                unit: goalUnit == "custom" ? customGoalUnit : goalUnit
             )
             gs.syncWithExternalArray(to: &goals)
             presentationMode.wrappedValue.dismiss()
         }
         else {
             print("TODO: add error screen that goal is still missing details")
-            // TODO: add error screen that goal is still missing details
         }
-        
     }
     
-    private func newGoalIsEmpty(goalType: String, customGoalType: String, goalUnit: String, customGoalUnit: String, targetWeight: String, deadline: Date, notes: String, isEmpty: Bool) {
+    private func newGoalIsFilled(goalType: String, goalName: String, goalUnit: String, customGoalUnit: String, targetWeight: String, deadline: Date, notes: String, isFull: Bool) {
+        if goalType == "Custom" && goalName.isEmpty {
+            self.isFull = false
+            return
+        }
+        
+        if goalUnit == "custom" && customGoalUnit == "..." {
+            self.isFull = false
+            return
+        }
+        
+        if targetWeight.isEmpty {
+            self.isFull = false
+            return
+        }
+        
+        self.isFull = true
+    }
+    
+    private func newGoalIsEmpty(goalType: String, goalUnit: String, customGoalUnit: String, targetWeight: String, deadline: Date, notes: String, isEmpty: Bool) {
         if goalType == "Custom" {
-            if customGoalType != "" {
+            if goalName != "" {
                 self.isEmpty = false
-                //print("is not empty")
             }
         }
         else if goalUnit == "custom" {
             if customGoalUnit != "..." {
                 self.isEmpty = false
-                //print("unit not empty")
             }
         }
         else if targetWeight != "" {
             self.isEmpty = false
-            //print("target is not empty")
         }
         else if notes != "" {
             self.isEmpty = false
-            //print("notes is not empty")
         }
         else {
             self.isEmpty = true
-        }
-        
-    }
-    
-    private func newGoalIsFilled(goalType: String, customGoalType: String, goalUnit: String, customGoalUnit: String, targetWeight: String, deadline: Date, notes: String, isFull: Bool) {
-        if ((goalType == "Custom" && customGoalType == "") || (goalUnit == "custom" && customGoalUnit == "...") || targetWeight == "") {
-            self.isFull = false
-            //print("not full")
-        }
-        else {
-            self.isFull = true
-            //print("full")
         }
     }
 }
 
 #Preview {
     @Previewable @State var goals: [Goal] = []
-    AddGoalView(goals: $goals)
+    return AddGoalView(goals: $goals)
 }
 
 

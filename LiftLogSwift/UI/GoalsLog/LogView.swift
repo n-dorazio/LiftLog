@@ -40,40 +40,52 @@ struct GoalsContent: View {
     @State private var showAddGoal = false
     @Binding public var goals: [Goal]
     
-    
     var body: some View {
-        ScrollView {
-            VStack(spacing: 20) {
-                // Add Button
-                HStack {
-                    Spacer()
-                    Button(action: {
-                        showAddGoal = true
-                    }) {
-                        Image(systemName: "plus")
-                            .font(.title2)
-                            .foregroundColor(.black)
-                            .padding(12)
-                            .background(Circle().fill(Color.gray.opacity(0.1)))
-                    }
-                }
-                .padding(.horizontal)
-                .sheet(isPresented: $showAddGoal) {
-                    AddGoalView(goals: $goals)
-                }
-                
-                // Goals List
-                if goals.isEmpty {
-                    Text("No goals yet")
-                        .foregroundColor(.gray)
-                        .padding(.top, 40)
-                } else {
-                    ForEach(goals) { goal in
-                        GoalCard(goal: goal)
-                    }
+        List {
+            if goals.isEmpty {
+                Text("No goals yet")
+                    .foregroundColor(.gray)
+                    .padding(.top, 40)
+                    .listRowBackground(Color.clear)
+            } else {
+                ForEach(goals) { goal in
+                    GoalCard(goal: goal, goals: $goals)
+                        .listRowInsets(EdgeInsets())
+                        .listRowBackground(Color.clear)
+                        .listRowSeparator(.hidden)
+                        .swipeActions(edge: .trailing, allowsFullSwipe: true) {
+                            Button(role: .destructive) {
+                                if let index = goals.firstIndex(where: { $0.id == goal.id }) {
+                                    goals.remove(at: index)
+                                }
+                            } label: {
+                                Label("Delete", systemImage: "trash")
+                            }
+                        }
                 }
             }
-            .padding(.vertical)
+        }
+        .listStyle(PlainListStyle())
+        .navigationBarItems(trailing: Button(action: {
+            showAddGoal = true
+        }) {
+            Image(systemName: "plus")
+                .font(.title2)
+                .foregroundColor(.white)
+                .padding(12)
+                .background(
+                    Circle()
+                        .fill(
+                            LinearGradient(
+                                gradient: Gradient(colors: [.orange, .red]),
+                                startPoint: .topLeading,
+                                endPoint: .bottomTrailing
+                            )
+                        )
+                )
+        })
+        .sheet(isPresented: $showAddGoal) {
+            AddGoalView(goals: $goals)
         }
     }
 }

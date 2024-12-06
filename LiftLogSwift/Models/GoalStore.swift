@@ -11,13 +11,15 @@ import SwiftUI
 class GoalStore: ObservableObject {
     private var internalGoals: [Goal]
     
-    func addGoal(type: String, targetWeight: Double, deadline: Date, notes: String) {
+    func addGoal(type: String, name: String, targetWeight: Double, deadline: Date, notes: String, unit: String) {
         let newGoal = Goal(
             type: type,
+            name: name,
             targetWeight: targetWeight,
             deadline: deadline,
             notes: notes,
-            progress: []
+            progress: [],
+            unit: unit
         )
         internalGoals.append(newGoal)
     }
