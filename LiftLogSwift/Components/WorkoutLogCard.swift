@@ -11,6 +11,7 @@ struct WorkoutLogCard: View {
     let session: WorkoutSession
     @ObservedObject var workoutStore: WorkoutStore
     @State private var showEditSheet = false
+    @State private var showLogDetails = false
     
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
@@ -36,6 +37,8 @@ struct WorkoutLogCard: View {
                         .background(Color.gray.opacity(0.1))
                         .clipShape(Circle())
                 }
+                .buttonStyle(PlainButtonStyle())
+                .allowsHitTesting(true)
                 
                 Text(formatDuration(session.duration))
                     .font(.headline)
@@ -53,8 +56,15 @@ struct WorkoutLogCard: View {
         .background(Color.white)
         .cornerRadius(20)
         .shadow(color: .gray.opacity(0.1), radius: 10)
+        .contentShape(Rectangle())
+        .onTapGesture {
+            showLogDetails = true
+        }
         .sheet(isPresented: $showEditSheet) {
             EditWorkoutLogView(workoutStore: workoutStore, session: session)
+        }
+        .sheet(isPresented: $showLogDetails) {
+            LogDetailView(session: session)
         }
     }
     
