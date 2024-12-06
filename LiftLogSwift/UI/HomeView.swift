@@ -35,7 +35,7 @@ struct HomeView: View {
                                 VStack(alignment: .leading) {
                                     Text("Hello Jane!")
                                         .foregroundColor(.gray)
-                                    Text("Friday, 08 Nov")
+                                    Text("Friday, 06 Nov")
                                         .font(.title2)
                                         .fontWeight(.bold)
                                 }
@@ -126,7 +126,7 @@ struct HomeView: View {
                             Text("My Plan")
                                 .font(.title2)
                                 .fontWeight(.bold)
-                            Text("July, 2021")
+                            Text("December, 2024")
                                 .foregroundColor(.gray)
                             
                             WorkoutPlanCard()
