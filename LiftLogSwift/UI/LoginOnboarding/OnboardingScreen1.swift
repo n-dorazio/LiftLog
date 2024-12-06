@@ -31,12 +31,13 @@ struct OnboardingScreen1: View {
 
                 VStack {
                     // App Icon
-                    Image("AppLogo") //Add Icon
+                    Image("AppLogo") // Add Icon
                         .resizable()
                         .frame(width: 100, height: 100)
                         .clipShape(RoundedRectangle(cornerRadius: 12))
-                        .offset(x:0, y:20)
+                        .offset(x: 0, y: 20)
                         .padding(.bottom, 20)
+
                     // Title
                     Text("Welcome to LiftLog!")
                         .font(.largeTitle)
@@ -89,21 +90,30 @@ struct OnboardingScreen1: View {
                     // Next Button
                     NavigationLink(destination: OnboardingScreen2(), isActive: $showNextScreen) {
                         Button(action: {
-                            showNextScreen = true
+                            if selectedGoal != "" && selectedGender != "" {
+                                showNextScreen = true
+                            }
                         }) {
-                            Image(systemName: "arrow.right")
-                                .frame(width: 50, height: 50)
-                                .foregroundColor(.white)
-                                .background(Color.black)
-                                .clipShape(Circle())
+                            HStack {
+                                Text("Next")
+                                    .fontWeight(.bold)
+                                    .foregroundColor(.white)
+                                    .padding(.horizontal)
+                                Image(systemName: "arrow.right")
+                                    .foregroundColor(.white)
+                            }
+                            .frame(width: 120, height: 50)
+                            .background((selectedGoal != "" && selectedGender != "") ? Color.black : Color.gray)
+                            .cornerRadius(25)
                         }
                     }
+                    .disabled(selectedGoal == "" || selectedGender == "") // Disable if inputs are not filled
                     .padding(.bottom, 20)
                 }
                 .padding()
             }
         }
-        .navigationBarBackButtonHidden(true) //Hides the back arrow
+        .navigationBarBackButtonHidden(true) // Hides the back arrow
     }
 }
 
@@ -130,7 +140,6 @@ struct RadioButton: View {
         .cornerRadius(24)
     }
 }
-
 
 struct Onboarding1_Previews: PreviewProvider {
     static var previews: some View {
