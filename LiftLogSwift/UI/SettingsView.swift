@@ -107,6 +107,12 @@ struct SettingsView: View {
                         VStack(spacing: 12) {
                             Button(action: {
                                 // Handle logout action
+                                // Replace the root view with LaunchView, ensuring no back button
+                                if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
+                                   let window = windowScene.windows.first {
+                                    window.rootViewController = UIHostingController(rootView: LaunchView())
+                                    window.makeKeyAndVisible()
+                                }
                             }) {
                                 Text("LOGOUT")
                                     .frame(maxWidth: .infinity)
@@ -176,8 +182,15 @@ struct ToggleSettingRow: View {
 struct EditBirthdayView: View {
     @Environment(\.presentationMode) var presentationMode
     @ObservedObject var settings: SettingsStore
-    @State private var birthdayInput: String = ""
-
+    @State private var selectedDate = Date()
+    
+    // Move the formatter outside the body
+    private let dateFormatter: DateFormatter = {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "MM/dd/yyyy" // Adjust format as desired
+        return formatter
+    }()
+    
     var body: some View {
         VStack {
             HStack {
@@ -186,6 +199,8 @@ struct EditBirthdayView: View {
                 }) {
                     Image(systemName: "chevron.left")
                         .font(.title2)
+                        .padding(15)
+                        .clipShape(Circle())
                 }
                 Spacer()
             }
@@ -195,13 +210,15 @@ struct EditBirthdayView: View {
                 .font(.title)
                 .bold()
                 .padding()
-
-            TextField("Enter your birthday", text: $birthdayInput)
+            
+            DatePicker("Select Birthday", selection: $selectedDate, displayedComponents: .date)
+                .datePickerStyle(GraphicalDatePickerStyle())
+                .frame(maxHeight: 400) // Adjust as needed
                 .padding()
-                .textFieldStyle(RoundedBorderTextFieldStyle())
-
+            
             Button(action: {
-                settings.birthday = birthdayInput
+                // Save the selected date as a string
+                settings.birthday = dateFormatter.string(from: selectedDate)
                 presentationMode.wrappedValue.dismiss()
             }) {
                 Text("Save")
@@ -210,13 +227,17 @@ struct EditBirthdayView: View {
                     .background(Color.blue)
                     .foregroundColor(.white)
                     .cornerRadius(10)
+                    .padding()
             }
-            .padding()
-
+            
             Spacer()
         }
         .onAppear {
-            birthdayInput = settings.birthday
+            if let date = dateFormatter.date(from: settings.birthday) {
+                selectedDate = date
+            } else {
+                selectedDate = Date()
+            }
         }
     }
 }
@@ -224,7 +245,9 @@ struct EditBirthdayView: View {
 struct EditGenderView: View {
     @Environment(\.presentationMode) var presentationMode
     @ObservedObject var settings: SettingsStore
-    @State private var genderInput: String = ""
+    
+    @State private var selectedGender: String = ""
+    let genderOptions = ["Male", "Female", "Non-binary", "Prefer not to specify"]
 
     var body: some View {
         VStack {
@@ -234,6 +257,8 @@ struct EditGenderView: View {
                 }) {
                     Image(systemName: "chevron.left")
                         .font(.title2)
+                        .padding(15)
+                        .clipShape(Circle())
                 }
                 Spacer()
             }
@@ -244,12 +269,25 @@ struct EditGenderView: View {
                 .bold()
                 .padding()
 
-            TextField("Enter your gender", text: $genderInput)
-                .padding()
-                .textFieldStyle(RoundedBorderTextFieldStyle())
+            Picker("Select your gender", selection: $selectedGender) {
+                ForEach(genderOptions, id: \.self) { option in
+                    Text(option).tag(option)
+                }
+            }
+            .pickerStyle(WheelPickerStyle())
+            .frame(height: 150) // Adjust as needed
+            .onAppear {
+                // Pre-select the current gender if it matches one of the options
+                if genderOptions.contains(settings.gender) {
+                    selectedGender = settings.gender
+                } else {
+                    // If current setting isn't in the list, choose a default
+                    selectedGender = "Prefer not to specify"
+                }
+            }
 
             Button(action: {
-                settings.gender = genderInput
+                settings.gender = selectedGender
                 presentationMode.wrappedValue.dismiss()
             }) {
                 Text("Save")
@@ -258,13 +296,10 @@ struct EditGenderView: View {
                     .background(Color.blue)
                     .foregroundColor(.white)
                     .cornerRadius(10)
+                    .padding()
             }
-            .padding()
 
             Spacer()
-        }
-        .onAppear {
-            genderInput = settings.gender
         }
     }
 }
@@ -282,6 +317,8 @@ struct EditUsernameView: View {
                 }) {
                     Image(systemName: "chevron.left")
                         .font(.title2)
+                        .padding(15)
+                        .clipShape(Circle())
                 }
                 Spacer()
             }
@@ -320,7 +357,11 @@ struct EditUsernameView: View {
 struct EditPasswordView: View {
     @Environment(\.presentationMode) var presentationMode
     @ObservedObject var settings: SettingsStore
+    
     @State private var passwordInput: String = ""
+    @State private var confirmPasswordInput: String = ""
+    @State private var isNewPasswordVisible: Bool = false
+    @State private var isConfirmPasswordVisible: Bool = false
 
     var body: some View {
         VStack {
@@ -330,6 +371,8 @@ struct EditPasswordView: View {
                 }) {
                     Image(systemName: "chevron.left")
                         .font(.title2)
+                        .padding(15)
+                        .clipShape(Circle())
                 }
                 Spacer()
             }
@@ -339,28 +382,68 @@ struct EditPasswordView: View {
                 .font(.title)
                 .bold()
                 .padding()
-
-            SecureField("Enter your password", text: $passwordInput)
-                .padding()
-                .textFieldStyle(RoundedBorderTextFieldStyle())
-
+            
+            // New Password Field
+            HStack {
+                if isNewPasswordVisible {
+                    TextField("Enter your new password", text: $passwordInput)
+                        .textFieldStyle(RoundedBorderTextFieldStyle())
+                        .padding()
+                } else {
+                    SecureField("Enter your new password", text: $passwordInput)
+                        .textFieldStyle(RoundedBorderTextFieldStyle())
+                        .padding()
+                }
+                Button(action: {
+                    isNewPasswordVisible.toggle()
+                }) {
+                    Image(systemName: isNewPasswordVisible ? "eye" : "eye.slash")
+                        .foregroundColor(.gray)
+                        .padding(.trailing)
+                }
+            }
+            
+            // Confirm Password Field
+            HStack {
+                if isConfirmPasswordVisible {
+                    TextField("Confirm your new password", text: $confirmPasswordInput)
+                        .textFieldStyle(RoundedBorderTextFieldStyle())
+                        .padding()
+                } else {
+                    SecureField("Confirm your new password", text: $confirmPasswordInput)
+                        .textFieldStyle(RoundedBorderTextFieldStyle())
+                        .padding()
+                }
+                Button(action: {
+                    isConfirmPasswordVisible.toggle()
+                }) {
+                    Image(systemName: isConfirmPasswordVisible ? "eye" : "eye.slash")
+                        .foregroundColor(.gray)
+                        .padding(.trailing)
+                }
+            }
+            
+            // Check if passwords match and are not empty
+            let passwordsMatch = !passwordInput.isEmpty && (passwordInput == confirmPasswordInput)
+            
             Button(action: {
-                settings.password = passwordInput
-                presentationMode.wrappedValue.dismiss()
+                // Save only if the passwords match
+                if passwordsMatch {
+                    settings.password = passwordInput
+                    presentationMode.wrappedValue.dismiss()
+                }
             }) {
                 Text("Save")
                     .frame(maxWidth: .infinity)
                     .padding()
-                    .background(Color.blue)
+                    .background(passwordsMatch ? Color.blue : Color.gray)
                     .foregroundColor(.white)
                     .cornerRadius(10)
+                    .padding(.horizontal)
             }
-            .padding()
-
+            .disabled(!passwordsMatch)
+            
             Spacer()
-        }
-        .onAppear {
-            passwordInput = settings.password
         }
     }
 }
@@ -377,15 +460,21 @@ struct EditableSettingRow: View {
                 .frame(width: 30)
             Text(title)
             Spacer()
-            Text(value)
-                .foregroundColor(.gray)
+            // If the title is "Password", show dots only
+            if title == "Password" {
+                Text("•••••••••")
+                    .foregroundColor(.gray)
+            } else {
+                Text(value)
+                    .foregroundColor(.gray)
+            }
+            
             Button(action: {
                 screenState = true
             }) {
                 Image(systemName: "pencil")
                     .foregroundColor(.gray)
             }
-            
         }
         .padding()
         .background(Color.gray.opacity(0.2))
