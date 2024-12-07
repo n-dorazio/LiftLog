@@ -3,63 +3,104 @@ import Foundation
 import Combine
 
 class UserProfileModel: ObservableObject {
-    @Published var name: String = "Jane Doe"
-    @Published var bio: String = "Fitness enthusiast and cardio lover"
-    @Published var topRoutines: [String] = ["Pull-ups", "Sit-ups", "Squats"]
+    
+    @Published var suggestedFriends: [Friend] = [
+        Friend(id: "John Smith", name: "John Smith", image: "jordan"),
+        Friend(id: "Alice Johnson", name: "Alice Johnson", image: "kate"),
+        Friend(id: "Christie", name: "Christie", image: "christie")
+    ]
+    
+    @Published var name: String = "Jane Doe" {
+        didSet { saveUserProfile() }
+    }
+    @Published var bio: String = "Fitness enthusiast and cardio lover" {
+        didSet { saveUserProfile() }
+    }
+    @Published var topRoutines: [String] = ["Pull-ups", "Sit-ups", "Squats"] {
+        didSet { saveUserProfile() }
+    }
     @Published var profileImageName: String = "JaneDoe" {
         didSet {
             UserDefaults.standard.set(profileImageName, forKey: "profileImageName")
+            saveUserProfile()
         }
     }
     @Published var friends: [Friend] = [] {
-        didSet { saveFriends() }
+        didSet {
+            saveFriends()
+            saveUserProfile()
+        }
     }
     @Published var posts: [ExistingPosts] = [] {
-        didSet { savePosts() }
-    }
-    
-    @Published var suggestedFriends: [Friend] = [
-        Friend(id: "Yousri", name: "Yousri", image: "yousri"),
-        Friend(id: "Kate", name: "Kate", image: "kate"),
-        Friend(id: "Jordan", name: "Jordan", image: "jordan"),
-        Friend(id: "Christine Gonzales", name: "Christine Gonzales", image: "christie")
-    ]
-
-    func imageURL() -> URL? {
-        // If the profileImageName is "JaneDoe", assume it's the default image
-        if profileImageName == "JaneDoe" {
-            return nil
+        didSet {
+            savePosts()
+            saveUserProfile()
         }
-        // If not default, it should be a filename in the documents directory
-        return getDocumentsDirectory().appendingPathComponent(profileImageName)
     }
     
+    // We'll create a separate struct for encoding/decoding name, bio, routines
+    struct UserProfileData: Codable {
+        let name: String
+        let bio: String
+        let topRoutines: [String]
+        let profileImageName: String
+    }
+
     init() {
+        loadUserProfile()
         loadFriends()
         loadPosts()
+        
         if posts.isEmpty {
             posts = [defaultPost]
         }
+        
         if let savedImageName = UserDefaults.standard.string(forKey: "profileImageName") {
             profileImageName = savedImageName
         }
     }
 
-    // File paths
+    func imageURL() -> URL? {
+        if profileImageName == "JaneDoe" {
+            return nil
+        }
+        return getDocumentsDirectory().appendingPathComponent(profileImageName)
+    }
+
+    // MARK: - File URLs
     private var friendsFileURL: URL {
         getDocumentsDirectory().appendingPathComponent("friends.json")
     }
+
     private var postsFileURL: URL {
         getDocumentsDirectory().appendingPathComponent("posts.json")
     }
+    
+    private var userProfileFileURL: URL {
+        getDocumentsDirectory().appendingPathComponent("userProfile.json")
+    }
 
-    // saving functions
+    // MARK: - Save/Load Functions
     func saveFriends() {
         do {
             let data = try JSONEncoder().encode(friends)
             try data.write(to: friendsFileURL)
         } catch {
             print("Error saving friends: \(error)")
+        }
+    }
+
+    func loadFriends() {
+        do {
+            let data = try Data(contentsOf: friendsFileURL)
+            friends = try JSONDecoder().decode([Friend].self, from: data)
+        } catch {
+            print("Error loading friends: \(error)")
+            friends = [
+                Friend(id: "John Smith", name: "John Smith", image: "jordan"),
+                Friend(id: "Alice Johnson", name: "Alice Johnson", image: "kate"),
+                Friend(id: "Christie", name: "Christie", image: "christie")
+            ]
         }
     }
 
@@ -72,30 +113,44 @@ class UserProfileModel: ObservableObject {
         }
     }
 
-    // loading function
-    func loadFriends() {
-        do {
-            let data = try Data(contentsOf: friendsFileURL)
-            friends = try JSONDecoder().decode([Friend].self, from: data)
-        } catch {
-            print("Error loading friends: \(error)")
-            // Initialize with default friends if needed
-            friends = [
-                Friend(id: "John Smith", name: "John Smith", image: "jordan"),
-                Friend(id: "Alice Johnson", name: "Alice Johnson", image: "kate"),
-                Friend(id: "Christie", name: "Christie", image: "christie")
-            ]
-        }
-    }
-
     func loadPosts() {
         do {
             let data = try Data(contentsOf: postsFileURL)
             posts = try JSONDecoder().decode([ExistingPosts].self, from: data)
         } catch {
             print("Error loading posts: \(error)")
-            // Initialize with default posts if needed
             posts = [defaultPost]
+        }
+    }
+
+    // Save user profile data (name, bio, topRoutines, profileImageName)
+    func saveUserProfile() {
+        let userData = UserProfileData(
+            name: name,
+            bio: bio,
+            topRoutines: topRoutines,
+            profileImageName: profileImageName
+        )
+        
+        do {
+            let data = try JSONEncoder().encode(userData)
+            try data.write(to: userProfileFileURL)
+        } catch {
+            print("Error saving user profile: \(error)")
+        }
+    }
+
+    func loadUserProfile() {
+        do {
+            let data = try Data(contentsOf: userProfileFileURL)
+            let userData = try JSONDecoder().decode(UserProfileData.self, from: data)
+            self.name = userData.name
+            self.bio = userData.bio
+            self.topRoutines = userData.topRoutines
+            self.profileImageName = userData.profileImageName
+        } catch {
+            print("Error loading user profile: \(error)")
+            // If fails, use defaults
         }
     }
 
@@ -103,7 +158,6 @@ class UserProfileModel: ObservableObject {
         FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
     }
 
-    // a default post
     var defaultPost: ExistingPosts {
         ExistingPosts(
             id: UUID(),

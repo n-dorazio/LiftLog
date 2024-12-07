@@ -199,7 +199,7 @@ struct ProfileView: View {
     @State private var showSettings = false
     @State private var showAddFriends = false
     @State private var showFriendsList = false
-    @StateObject private var userProfile = UserProfileModel()
+    @StateObject var userProfile = UserProfileModel()
     @StateObject private var settingsStore = SettingsStore()
 
     var body: some View {
@@ -507,5 +507,5 @@ struct ActivityView: UIViewControllerRepresentable {
 }
 
 #Preview {
-    ProfileView()
+    ProfileView(userProfile: UserProfileModel())
 }
