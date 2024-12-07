@@ -8,6 +8,12 @@
 import SwiftUI
 import Combine
 
+extension View {
+    func hideKeyboard() {
+        UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
+    }
+}
+
 struct WorkoutSessionView: View {
     @ObservedObject var workoutStore: WorkoutStore
     let routine: Routine
@@ -402,6 +408,9 @@ struct WorkoutSessionView: View {
                     }
                 }
             }
+        }
+        .onTapGesture {
+            hideKeyboard()
         }
         .sheet(isPresented: $showSkipAlert) {
             VStack(spacing: 20) {

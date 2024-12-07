@@ -30,7 +30,7 @@ struct EditGoalView: View {
         self._goals = goals
         _goalType = State(initialValue: goal.type)
         _goalName = State(initialValue: goal.name)
-        _goalUnit = State(initialValue: goal.unit)
+        _goalUnit = State(initialValue: goal.unit == "..." ? "custom" : goal.unit)
         _customGoalUnit = State(initialValue: goal.unit)
         _targetWeight = State(initialValue: String(format: "%.1f", goal.targetWeight))
         _deadline = State(initialValue: goal.deadline)
@@ -81,8 +81,13 @@ struct EditGoalView: View {
                         .labelsHidden()
                 }
                 
-                // Notes
+                // Notes Section
+                Section(header: Text("Notes").foregroundColor(.orange)) {
+                    TextEditor(text: $notes)
+                        .frame(height: 100)
+                }
                 
+                // Save Button
                 Section {
                     Button(action: saveGoal) {
                         HStack {

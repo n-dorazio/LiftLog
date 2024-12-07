@@ -12,6 +12,7 @@ struct HomeView: View {
     @State private var showCalendar = false
     @State private var showDetailsModal = false
     @State private var selectedDate = Date()
+    @StateObject private var userProfile = UserProfileModel()
     
     var body: some View {
         NavigationView {
@@ -22,14 +23,26 @@ struct HomeView: View {
                         HStack {
                             HStack(spacing: 12) {
                                 NavigationLink(destination: ProfileView()) {
-                                    Image("JaneDoe")
-                                        .resizable()
-                                        .aspectRatio(contentMode: .fill)
-                                        .frame(width: 50, height: 50)
-                                        .clipShape(Circle())
-                                        .overlay(
-                                            Circle().stroke(Color.white, lineWidth: 2)
-                                        )
+                                    if let imageURL = userProfile.imageURL(),
+                                       let imageData = try? Data(contentsOf: imageURL),
+                                       let uiImage = UIImage(data: imageData) {
+                                        Image(uiImage: uiImage)
+                                            .resizable()
+                                            .aspectRatio(contentMode: .fill)
+                                            .frame(width: 50, height: 50)
+                                            .clipShape(Circle())
+                                            .overlay(Circle().stroke(Color.white, lineWidth: 2))
+                                            .shadow(radius: 5)
+                                    } else {
+                                        // Fallback to default image
+                                        Image("JaneDoe")
+                                            .resizable()
+                                            .aspectRatio(contentMode: .fill)
+                                            .frame(width: 50, height: 50)
+                                            .clipShape(Circle())
+                                            .overlay(Circle().stroke(Color.white, lineWidth: 2))
+                                            .shadow(radius: 5)
+                                    }
                                 }
                                 
                                 VStack(alignment: .leading) {
