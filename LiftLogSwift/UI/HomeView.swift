@@ -12,6 +12,15 @@ struct HomeView: View {
     @State private var showCalendar = false
     @State private var showDetailsModal = false
     @State private var selectedDate = Date()
+    private let dateFormatter: DateFormatter = {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "EEEE, dd MMM"
+        return formatter
+    }()
+    
+    var formattedDate: String {
+        return dateFormatter.string(from: selectedDate)
+    }
     
     var body: some View {
         NavigationView {
@@ -35,7 +44,7 @@ struct HomeView: View {
                                 VStack(alignment: .leading) {
                                     Text("Hello Jane!")
                                         .foregroundColor(.gray)
-                                    Text("Friday, 06 Nov")
+                                    Text(formattedDate)
                                         .font(.title2)
                                         .fontWeight(.bold)
                                 }
@@ -169,61 +178,6 @@ struct HomeView: View {
                 }
             }
         }
-    }
-}
-
-
-struct CalendarView: View {
-    @Binding var selectedDate: Date
-    var onClose: (() -> Void)? // Closure to handle the close action
-    
-    var body: some View {
-        VStack {
-            // Header with close button
-            HStack {
-                Text("Select a Date")
-                    .font(.system(size: 25, weight: .bold))
-                    .padding()
-                
-                Spacer()
-                
-                // Close button
-                Button(action: {
-                    onClose?()
-                }) {
-                    Image(systemName: "xmark.circle.fill")
-                        .font(.title2)
-                        .foregroundColor(.gray)
-                }
-                .padding()
-            }
-            
-            // Date Picker
-            DatePicker(
-                "Date",
-                selection: $selectedDate,
-                displayedComponents: [.date]
-            )
-            .datePickerStyle(GraphicalDatePickerStyle())
-            .padding()
-            
-            Spacer()
-            
-            // Done Button
-            Button(action: {
-                onClose?()
-            }) {
-                Text("Done")
-                    .fontWeight(.bold)
-                    .frame(maxWidth: .infinity)
-                    .padding()
-                    .background(Capsule().fill(Color.orange))
-                    .foregroundColor(.white)
-                    .padding()
-            }
-        }
-        .padding()
-        .frame(height: 500)
     }
 }
 
