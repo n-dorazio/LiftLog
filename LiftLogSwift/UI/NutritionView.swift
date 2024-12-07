@@ -10,103 +10,149 @@
 import SwiftUI
 
 struct NutritionView: View {
-    @State private var selectedDate = Date()  // State for the selected date
-    @State private var showCalendar = false   // State for showing the calendar popup
+    @StateObject private var mealStore = MealStore()
+    @State private var selectedDate = Date()
+    @State private var showCalendar = false
+    @State private var showNewMeal = false
+    @State private var mealToEdit: Meal?
+    
+    private let dateFormatter: DateFormatter = {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "EEEE, dd MMM"
+        return formatter
+    }()
+    
+    var formattedDate: String {
+        return dateFormatter.string(from: selectedDate)
+    }
+    
+    var totalCalories: Int {
+        mealStore.mealsForDate(selectedDate).reduce(0) { $0 + $1.calories }
+    }
     
     var body: some View {
         NavigationView {
-            ScrollView {
+            ZStack {
                 VStack(spacing: 20) {
-                    // Title and Calendar Toggle Button
-                    HStack {
-                        Text("Nutrition")
-                            .font(.largeTitle)
-                            .fontWeight(.bold)
-                        
-                        Spacer()
-                        
-                        // Calendar Toggle Button
-                        Button(action: {
-                            withAnimation {
-                                showCalendar.toggle()
+                    ScrollView {
+                        VStack(spacing: 20) {
+                            // Title and Calendar section
+                            HStack {
+                                VStack(alignment: .leading) {
+                                    Text("Nutrition")
+                                        .font(.largeTitle)
+                                        .fontWeight(.bold)
+                                    Text(formattedDate)
+                                        .font(.title2)
+                                        .foregroundColor(.gray)
+                                }
+                                
+                                Spacer()
+                                
+                                Button(action: {
+                                    withAnimation {
+                                        showCalendar.toggle()
+                                    }
+                                }) {
+                                    Image(systemName: "calendar")
+                                        .font(.title2)
+                                        .foregroundColor(.black)
+                                        .padding(12)
+                                        .background(Circle().fill(Color.white))
+                                        .shadow(color: .gray.opacity(0.2), radius: 5)
+                                }
                             }
-                        }) {
-                            Image(systemName: "calendar")
+                            
+                            // Calories Card
+                            CaloriesCard(consumed: totalCalories, goal: 2500)
+                            
+                            // Add Meal Button
+                            Button(action: {
+                                showNewMeal = true
+                            }) {
+                                HStack {
+                                    Image(systemName: "plus.circle.fill")
+                                    Text("Add Meal")
+                                }
                                 .font(.title2)
-                                .foregroundColor(.black)
-                                .padding(12)
-                                .background(Circle().fill(Color.white))
-                                .shadow(color: .gray.opacity(0.2), radius: 5)
+                                .fontWeight(.bold)
+                                .frame(maxWidth: .infinity)
+                                .padding()
+                                .background(
+                                    LinearGradient(colors: [.orange, .red], 
+                                                 startPoint: .topLeading, 
+                                                 endPoint: .bottomTrailing)
+                                )
+                                .foregroundColor(.white)
+                                .cornerRadius(15)
+                            }
                         }
-                    }
-                    .padding(.top)
-                    
-                    // Calories Progress
-                    CaloriesCard(
-                        consumed: 1883,
-                        goal: 2500
-                    )
-                    
-                    // Meal Creation Button (NavigationLink)
-                    NavigationLink(destination: NewMealView()) {
-                        Text("Create New Meal")
-                            .font(.title2)
-                            .fontWeight(.bold)
-                            .frame(maxWidth: .infinity)
-                            .padding()
-                            .background(Capsule().fill(Color.orange))
-                            .foregroundColor(.white)
-                            .shadow(color: .gray.opacity(0.3), radius: 5)
+                        .padding()
                     }
                     
-                    // Meals List
-                    VStack(alignment: .leading, spacing: 15) {
+                    // Meals List Section
+                    VStack(alignment: .leading) {
                         Text("Today's Meals")
                             .font(.headline)
-                            .padding(.top)
+                            .padding(.horizontal)
                         
-                        // Hardcoded meal cards
-                        MealCard(mealType: "Breakfast", calories: "650 kcal", time: "7:30 AM")
-                        MealCard(mealType: "Snack", calories: "200 kcal", time: "10:00 AM")
-                        MealCard(mealType: "Lunch", calories: "800 kcal", time: "12:30 PM")
-                        MealCard(mealType: "Afternoon Snack", calories: "150 kcal", time: "3:00 PM")
-                        MealCard(mealType: "Dinner", calories: "900 kcal", time: "6:30 PM")
-                        MealCard(mealType: "Supper", calories: "300 kcal", time: "9:00 PM")
-                        MealCard(mealType: "Brunch", calories: "500 kcal", time: "11:00 AM")
+                        List {
+                            ForEach(mealStore.mealsForDate(selectedDate)) { meal in
+                                MealCard(
+                                    meal: meal,
+                                    onDelete: {
+                                        mealStore.deleteMeal(meal)
+                                    },
+                                    onEdit: {
+                                        mealToEdit = meal
+                                    }
+                                )
+                                .listRowInsets(EdgeInsets())
+                                .listRowBackground(Color.clear)
+                                .listRowSeparator(.hidden)
+                                .padding(.horizontal)
+                                .padding(.vertical, 8)
+                            }
+                        }
+                        .listStyle(PlainListStyle())
                     }
-                    .padding(.top)
                 }
-                .padding()
+                
+                // Calendar Popup
+                if showCalendar {
+                    VStack {
+                        CalendarView(selectedDate: $selectedDate) {
+                            withAnimation {
+                                showCalendar = false
+                            }
+                        }
+                        .background(
+                            Color.white
+                                .cornerRadius(20)
+                                .shadow(radius: 10)
+                        )
+                        .padding()
+                        .transition(.scale(scale: 0.95))
+                        
+                        Spacer()
+                    }
+                    .background(
+                        Color.black.opacity(0.3)
+                            .edgesIgnoringSafeArea(.all)
+                            .onTapGesture {
+                                withAnimation {
+                                    showCalendar.toggle()
+                                }
+                            }
+                    )
+                }
             }
         }
-        
-        // Calendar Popup
-        if showCalendar {
-            VStack {
-                CalendarView(selectedDate: $selectedDate) {
-                    withAnimation {
-                        showCalendar = false
-                    }
-                }
-                .background(
-                    Color.white
-                        .cornerRadius(20)
-                        .shadow(radius: 10)
-                )
-                .padding()
-                .transition(.scale(scale: 0.95))
-                
-                Spacer()
-            }
-            .background(
-                Color.black.opacity(0.3)
-                    .edgesIgnoringSafeArea(.all)
-                    .onTapGesture {
-                        withAnimation {
-                            showCalendar.toggle()
-                        }
-                    }
-            )
+        .sheet(isPresented: $showNewMeal) {
+            NewMealView(mealStore: mealStore)
+        }
+        .sheet(item: $mealToEdit) { meal in
+            NewMealView(mealStore: mealStore, editingMeal: meal)
         }
     }
 }
@@ -137,115 +183,126 @@ struct CaloriesCard: View {
 
 // New Meal View (Page)
 struct NewMealView: View {
+    @Environment(\.presentationMode) var presentationMode
+    @ObservedObject var mealStore: MealStore
     @State private var mealTitle = ""
     @State private var protein = ""
     @State private var calories = ""
     @State private var fats = ""
     @State private var carbs = ""
     @State private var mealDescription = ""
+    @State private var selectedTime = Date()
+    @State private var showAlert = false
+    @State private var alertMessage = ""
     
-    var body: some View {
-        VStack {
-            // Header
-            HStack {
-                Text("Create a New Meal")
-                    .font(.title)
-                    .fontWeight(.bold)
-                    .padding()
-                
-                Spacer()
-            }
-            
-            // Meal Title Text Field
-            TextField("Meal Title", text: $mealTitle)
-                .textFieldStyle(RoundedBorderTextFieldStyle())
-                .padding()
-            
-            // Calories Text Field
-            TextField("Calories", text: $calories)
-                .keyboardType(.numberPad)
-                .textFieldStyle(RoundedBorderTextFieldStyle())
-                .padding()
-            
-            // Protein Text Field
-            TextField("Protein (g)", text: $protein)
-                .keyboardType(.decimalPad)
-                .textFieldStyle(RoundedBorderTextFieldStyle())
-                .padding()
-            
-            // Fats Text Field
-            TextField("Fats (g)", text: $fats)
-                .keyboardType(.decimalPad)
-                .textFieldStyle(RoundedBorderTextFieldStyle())
-                .padding()
-            
-            // Carbs Text Field
-            TextField("Carbs (g)", text: $carbs)
-                .keyboardType(.decimalPad)
-                .textFieldStyle(RoundedBorderTextFieldStyle())
-                .padding()
-            
-            // Meal Description TextEditor
-            TextEditor(text: $mealDescription)
-                .frame(width:375, height: 150)
-                .background(Color.gray.opacity(0.1))
-                .cornerRadius(10)
-                .overlay(
-                    RoundedRectangle(cornerRadius: 10)
-                        .stroke(Color.gray, lineWidth: 1)
-                )
-                .padding(.bottom)
-            
-            
-            // Save Button
-            Button(action: {
-                // Add functionality to save the new meal
-                //print("Meal Saved: \(mealTitle), Protein: \(protein)g, Calories: \(calories) kcal, Fats: \(fats)g, Carbs: \(carbs)g, Description : \(mealDescription)")
-            }) {
-                Text("Save Meal")
-                    .fontWeight(.bold)
-                    .frame(maxWidth: .infinity)
-                    .padding()
-                    .background(Capsule().fill(Color.orange))
-                    .foregroundColor(.white)
-                    .padding()
-            }
-            .padding(.top)
-            
-            Spacer()
+    var editingMeal: Meal?
+    
+    init(mealStore: MealStore, editingMeal: Meal? = nil) {
+        self.mealStore = mealStore
+        self.editingMeal = editingMeal
+        
+        if let meal = editingMeal {
+            _mealTitle = State(initialValue: meal.title)
+            _calories = State(initialValue: String(meal.calories))
+            _protein = State(initialValue: String(meal.protein))
+            _fats = State(initialValue: String(meal.fats))
+            _carbs = State(initialValue: String(meal.carbs))
+            _mealDescription = State(initialValue: meal.description)
+            _selectedTime = State(initialValue: meal.time)
         }
     }
+    
+    var body: some View {
+        NavigationView {
+            ScrollView {
+                VStack(spacing: 20) {
+                    Group {
+                        TextField("Meal Title", text: $mealTitle)
+                            .textFieldStyle(RoundedBorderTextFieldStyle())
+                        
+                        DatePicker("Time", selection: $selectedTime, displayedComponents: [.hourAndMinute])
+                        
+                        TextField("Calories", text: $calories)
+                            .keyboardType(.numberPad)
+                            .textFieldStyle(RoundedBorderTextFieldStyle())
+                        
+                        TextField("Protein (g)", text: $protein)
+                            .keyboardType(.decimalPad)
+                            .textFieldStyle(RoundedBorderTextFieldStyle())
+                        
+                        TextField("Fats (g)", text: $fats)
+                            .keyboardType(.decimalPad)
+                            .textFieldStyle(RoundedBorderTextFieldStyle())
+                        
+                        TextField("Carbs (g)", text: $carbs)
+                            .keyboardType(.decimalPad)
+                            .textFieldStyle(RoundedBorderTextFieldStyle())
+                    }
+                    .padding(.horizontal)
+                    
+                    TextEditor(text: $mealDescription)
+                        .frame(height: 100)
+                        .padding(4)
+                        .background(RoundedRectangle(cornerRadius: 8).stroke(Color.gray.opacity(0.2)))
+                        .padding(.horizontal)
+                }
+                .padding(.vertical)
+            }
+            .navigationTitle(editingMeal != nil ? "Edit Meal" : "New Meal")
+            .navigationBarItems(
+                leading: Button("Cancel") {
+                    presentationMode.wrappedValue.dismiss()
+                },
+                trailing: Button("Save") {
+                    saveMeal()
+                }
+            )
+            .alert(isPresented: $showAlert) {
+                Alert(
+                    title: Text("Error"),
+                    message: Text(alertMessage),
+                    dismissButton: .default(Text("OK"))
+                )
+            }
+        }
+    }
+    
+    private func saveMeal() {
+        guard !mealTitle.isEmpty else {
+            alertMessage = "Please enter a meal title"
+            showAlert = true
+            return
+        }
+        
+        guard let caloriesInt = Int(calories),
+              let proteinDouble = Double(protein),
+              let fatsDouble = Double(fats),
+              let carbsDouble = Double(carbs) else {
+            alertMessage = "Please enter valid numbers for calories and macros"
+            showAlert = true
+            return
+        }
+        
+        let meal = Meal(
+            id: editingMeal?.id ?? UUID(),
+            title: mealTitle,
+            calories: caloriesInt,
+            protein: proteinDouble,
+            fats: fatsDouble,
+            carbs: carbsDouble,
+            description: mealDescription,
+            time: selectedTime
+        )
+        
+        if editingMeal != nil {
+            mealStore.updateMeal(meal)
+        } else {
+            mealStore.addMeal(meal)
+        }
+        
+        presentationMode.wrappedValue.dismiss()
+    }
 }
-
-
-//
-//struct MealCard: View {
-//    let mealType: String
-//    let calories: String
-//    let time: String
-//
-//    var body: some View {
-//        VStack(alignment: .leading, spacing: 10) {
-//            Text(mealType)
-//                .font(.title3)
-//                .fontWeight(.bold)
-//
-//            HStack {
-//                Text("Calories: \(calories)")
-//                    .foregroundColor(.gray)
-//                Spacer()
-//                Text("Time: \(time)")
-//                    .foregroundColor(.gray)
-//            }
-//        }
-//        .padding()
-//        .background(Color.white)
-//        .cornerRadius(10)
-//        .shadow(radius: 5)
-//    }
-//}
-
-
 
 #Preview {
     NutritionView()
