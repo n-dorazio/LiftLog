@@ -17,6 +17,13 @@ class UserProfileModel: ObservableObject {
     @Published var posts: [ExistingPosts] = [] {
         didSet { savePosts() }
     }
+    
+    @Published var suggestedFriends: [Friend] = [
+        Friend(id: "Yousri", name: "Yousri", image: "yousri"),
+        Friend(id: "Kate", name: "Kate", image: "kate"),
+        Friend(id: "Jordan", name: "Jordan", image: "jordan"),
+        Friend(id: "Christine Gonzales", name: "Christine Gonzales", image: "christie")
+    ]
 
     func imageURL() -> URL? {
         // If the profileImageName is "JaneDoe", assume it's the default image
