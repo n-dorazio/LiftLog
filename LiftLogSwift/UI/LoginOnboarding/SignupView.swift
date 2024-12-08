@@ -10,6 +10,7 @@ import SwiftUI
 struct SignupView: View {
     @State private var email: String = ""
     @State private var password: String = ""
+    @State private var passwordConfirm: String = ""
     @State private var isPasswordHidden: Bool = true
     @State private var isLoggedIn: Bool = false
     @State private var isSignedUp: Bool = false
@@ -35,7 +36,7 @@ struct SignupView: View {
                 VStack {
                     // Top Icon
                     Spacer()
-                    Image("AppLogo") //Add Icon
+                    Image("AppLogo")
                         .resizable()
                         .frame(width: 100, height: 100)
                         .clipShape(RoundedRectangle(cornerRadius: 12))
@@ -109,9 +110,9 @@ struct SignupView: View {
                             Image(systemName: "lock")
                                 .foregroundColor(.gray)
                             if isPasswordHidden {
-                                SecureField("Enter your password", text: $password)
+                                SecureField("Enter your password", text: $passwordConfirm)
                             } else {
-                                TextField("Enter your password", text: $password)
+                                TextField("Enter your password", text: $passwordConfirm)
                             }
                             Button(action: {
                                 isPasswordHidden.toggle()

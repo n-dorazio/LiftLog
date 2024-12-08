@@ -9,9 +9,17 @@ import SwiftUI
 
 struct AddFriendsView: View {
     @Environment(\.presentationMode) var presentationMode
-    @Binding var friends: [Friend] // Binding to the user's friends list
-    @Binding var suggestedFriends: [Friend] // Now using @Binding for suggestedFriends
+    @Binding var friends: [Friend]
     @State private var searchText = ""
+    
+    let suggestedFriends = [
+        Friend(id: "Yousri", name: "Yousri", image: "yousri"),
+        Friend(id: "Kate", name: "Kate", image: "kate"),
+        Friend(id: "Jordan", name: "Jordan", image: "jordan"),
+        Friend(id: "Christine Gonzales", name: "Christine Gonzales", image: "christie")
+    ]
+    
+    // filter friends based on searchText
 
     var filteredFriends: [Friend] {
         if searchText.isEmpty {
@@ -32,7 +40,7 @@ struct AddFriendsView: View {
                         .autocapitalization(.none)
                         .disableAutocorrection(true)
                     Button(action: {
-                        // handle filter options if needed
+
                     }) {
                         Image(systemName: "slider.horizontal.3")
                             .foregroundColor(.gray)

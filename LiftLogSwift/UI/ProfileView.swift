@@ -9,8 +9,6 @@ import SwiftUI
 import UIKit
 import Foundation
 
-//
-
 
 struct ExistingPosts: Identifiable, Codable {
     let id: UUID

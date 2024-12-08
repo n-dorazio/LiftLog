@@ -55,7 +55,6 @@ struct PasswordSentView: View {
                 
                 // Resend Password Button
                 Button(action: {
-                    // Handle resend action
                 }) {
                     HStack {
                         Text("Re-Send Password")

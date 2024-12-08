@@ -56,25 +56,25 @@ struct GoalCard: View {
                 }
             }
             
-            // Progress section with units
-            if !goal.progress.isEmpty {
-                VStack(alignment: .leading, spacing: 8) {
-                    Text("Progress")
-                        .font(.headline)
-                        .foregroundColor(.orange)
-                    ForEach(goal.progress) { progress in
-                        HStack {
-                            Image(systemName: "circle.fill")
-                                .font(.system(size: 6))
-                                .foregroundColor(.orange)
-                            Text("\(dateFormatter.string(from: progress.date))")
-                            Text("\(String(format: "%.1f", progress.weight)) \(goal.unit)")
-                                .bold()
-                        }
-                        .foregroundColor(.gray)
-                    }
-                }
-            }
+//            // Progress section with units
+//            if !goal.progress.isEmpty {
+//                VStack(alignment: .leading, spacing: 8) {
+//                    Text("Progress")
+//                        .font(.headline)
+//                        .foregroundColor(.orange)
+//                    ForEach(goal.progress) { progress in
+//                        HStack {
+//                            Image(systemName: "circle.fill")
+//                                .font(.system(size: 6))
+//                                .foregroundColor(.orange)
+//                            Text("\(dateFormatter.string(from: progress.date))")
+//                            Text("\(String(format: "%.1f", progress.weight)) \(goal.unit)")
+//                                .bold()
+//                        }
+//                        .foregroundColor(.gray)
+//                    }
+//                }
+//            }
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding()

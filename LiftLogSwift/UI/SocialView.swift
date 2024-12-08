@@ -37,9 +37,8 @@ struct SocialView: View {
             ScrollView {
                 VStack(spacing: 20) {
 
-                    // Use ForEach to dynamically create posts
                     ForEach(postsManager.posts) { post in
-                        SocialPost(post: post) // Pass each post to SocialPost
+                        SocialPost(post: post)
 
                     }
                 }
@@ -58,7 +57,6 @@ struct SocialView: View {
                                 .frame(width: 40, height: 40)
                                 .background(Color.orange)
                                 .clipShape(Circle())
-                                //.shadow(color: .gray.opacity(0.6), radius: 5, x: 0, y: 4)
                         }
                         // Messages Button
                         NavigationLink(destination: MessagingView()) {
@@ -68,7 +66,6 @@ struct SocialView: View {
                                 .frame(width: 40, height: 40)
                                 .background(Color.orange)
                                 .clipShape(Circle())
-                                //.shadow(color: .gray.opacity(0.6), radius: 5, x: 0, y: 4)
                         }
                     }
                 }
@@ -84,7 +81,7 @@ struct SocialView: View {
 struct Comment: Identifiable {
     let id = UUID() // Unique identifier for each comment
     let username: String
-    let profilePicture: String // Use image name from the asset catalog
+    let profilePicture: String
     let text: String
 }
 
@@ -117,8 +114,8 @@ struct SocialPost: View {
                 }
 
                 // Post Content
-                Text(post.content) // Display the actual post content
-
+                Text(post.content)
+                
                 // Comments Section
                 if !comments.isEmpty {
                     Text("Comments:")
@@ -192,7 +189,6 @@ struct SocialPost: View {
     
     
     
-    // Place this struct at the top level of the file
     struct ShareSheet: UIViewControllerRepresentable {
         var items: [Any] // Items to share
         var activities: [UIActivity]? = nil // Optional custom activities
@@ -232,11 +228,11 @@ struct SocialPost: View {
                 .navigationTitle("Add Comment")
                 .navigationBarItems(
                     leading: Button("Cancel") {
-                        onCancel() // Dismiss the modal
+                        onCancel()
                     },
                     trailing: Button("Post") {
-                        onPost(commentText) // Pass comment to the onPost closure
-                        onCancel() // Dismiss the modal after posting
+                        onPost(commentText)
+                        onCancel()
                     }
                 )
                 .onAppear {
@@ -406,23 +402,6 @@ struct CreatePostView: View {
                             .padding(.horizontal)
                     }
 
-                    // Modern Image Upload Button
-                  //  Button(action: {
-                  //      showingImagePicker = true
-                  //  }) {
-                  //      HStack {
-                  //          Image(systemName: "photo.on.rectangle")
-                  //              .font(.system(size: 18))
-                  //          Text("Add Image")
-                  //              .font(.headline)
-                  //      }
-                  //      .padding()
-                  //      .frame(maxWidth: .infinity)
-                  //      .background(Color.blue)
-                  //      .foregroundColor(.white)
-                   //     .cornerRadius(10)
-                    //    .padding(.horizontal)
-                   // }
                 }
                 .padding(.vertical)
 

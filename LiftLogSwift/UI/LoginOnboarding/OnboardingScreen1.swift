@@ -31,7 +31,7 @@ struct OnboardingScreen1: View {
 
                 VStack {
                     // App Icon
-                    Image("AppLogo") // Add Icon
+                    Image("AppLogo")
                         .resizable()
                         .frame(width: 100, height: 100)
                         .clipShape(RoundedRectangle(cornerRadius: 12))
@@ -84,6 +84,7 @@ struct OnboardingScreen1: View {
                             selectedGender = "Female"
                         }
                     }
+                    .padding(.horizontal, 16)
 
                     Spacer()
 

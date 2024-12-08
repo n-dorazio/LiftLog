@@ -187,7 +187,7 @@ struct EditBirthdayView: View {
     // Move the formatter outside the body
     private let dateFormatter: DateFormatter = {
         let formatter = DateFormatter()
-        formatter.dateFormat = "MM/dd/yyyy" // Adjust format as desired
+        formatter.dateFormat = "MM/dd/yyyy"
         return formatter
     }()
     
@@ -213,7 +213,7 @@ struct EditBirthdayView: View {
             
             DatePicker("Select Birthday", selection: $selectedDate, displayedComponents: .date)
                 .datePickerStyle(GraphicalDatePickerStyle())
-                .frame(maxHeight: 400) // Adjust as needed
+                .frame(maxHeight: 400)
                 .padding()
             
             Button(action: {
@@ -275,7 +275,7 @@ struct EditGenderView: View {
                 }
             }
             .pickerStyle(WheelPickerStyle())
-            .frame(height: 150) // Adjust as needed
+            .frame(height: 150)
             .onAppear {
                 // Pre-select the current gender if it matches one of the options
                 if genderOptions.contains(settings.gender) {

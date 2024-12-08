@@ -162,7 +162,7 @@ struct OnboardingScreen2: View {
             }
         }
         .fullScreenCover(isPresented: $isFinishedOnboarding) {
-            ContentView() // Replace with your main app's next screen
+            ContentView()
         }
     }
 }
