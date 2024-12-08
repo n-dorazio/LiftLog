@@ -197,13 +197,12 @@ struct ProfileView: View {
     @State private var showSettings = false
     @State private var showAddFriends = false
     @State private var showFriendsList = false
-    @StateObject private var userProfile = UserProfileModel()
+    @StateObject var userProfile = UserProfileModel()
     @StateObject private var settingsStore = SettingsStore()
 
     var body: some View {
         ScrollView {
             VStack(spacing: 24) {
-                // Profile Header
                 ZStack {
                     Text(userProfile.name)
                         .font(.title2)
@@ -220,9 +219,7 @@ struct ProfileView: View {
                 }
                 .padding(.horizontal)
 
-                // Profile Image and Stats
                 VStack(spacing: 20) {
-                    // Load custom image if available
                     if let imageURL = userProfile.imageURL(),
                        let imageData = try? Data(contentsOf: imageURL),
                        let uiImage = UIImage(data: imageData) {
@@ -234,7 +231,6 @@ struct ProfileView: View {
                             .overlay(Circle().stroke(Color.white, lineWidth: 2))
                             .shadow(radius: 5)
                     } else {
-                        // Fallback to default image
                         Image("JaneDoe")
                             .resizable()
                             .aspectRatio(contentMode: .fill)
@@ -253,7 +249,6 @@ struct ProfileView: View {
                                 .foregroundColor(.gray)
                         }
 
-                        // Friends Count as Button
                         Button(action: {
                             showFriendsList = true
                         }) {
@@ -280,7 +275,6 @@ struct ProfileView: View {
                         .foregroundColor(.gray)
                 }
 
-                // Top Routines
                 VStack(alignment: .leading, spacing: 16) {
                     Text("Top Routines")
                         .font(.title3)
@@ -303,7 +297,6 @@ struct ProfileView: View {
                 }
                 .padding(.horizontal)
 
-                // Posts
                 VStack(spacing: 16) {
                     ForEach($userProfile.posts) { $post in
                         NavigationLink(destination: PostDetailView(post: $post)) {
@@ -320,35 +313,58 @@ struct ProfileView: View {
             SettingsView(userProfile: userProfile, settings: settingsStore)
         }
         .sheet(isPresented: $showAddFriends) {
-            AddFriendsView(friends: $userProfile.friends)
+            AddFriendsView(
+                friends: $userProfile.friends,
+                suggestedFriends: $userProfile.suggestedFriends
+            )
         }
         .sheet(isPresented: $showFriendsList) {
-            FriendsListView(friends: userProfile.friends)
+            FriendsListView(friends: $userProfile.friends, suggestedFriends: $userProfile.suggestedFriends)
         }
     }
 }
 
 struct FriendsListView: View {
-    let friends: [Friend]
+    @Binding var friends: [Friend]
+    @Binding var suggestedFriends: [Friend]
     @Environment(\.dismiss) var dismiss
 
     var body: some View {
         NavigationView {
-            List(friends) { friend in
-                HStack {
-                    Image(friend.image)
-                        .resizable()
-                        .aspectRatio(contentMode: .fill)
-                        .frame(width: 50, height: 50)
-                        .clipShape(Circle())
-                    Text(friend.name)
-                        .font(.headline)
+            List {
+                ForEach(friends) { friend in
+                    HStack {
+                        Image(friend.image)
+                            .resizable()
+                            .aspectRatio(contentMode: .fill)
+                            .frame(width: 50, height: 50)
+                            .clipShape(Circle())
+                        Text(friend.name)
+                            .font(.headline)
+                    }
+                    .swipeActions(edge: .trailing) {
+                        Button(role: .destructive) {
+                            removeFriend(friend)
+                        } label: {
+                            Label("Remove", systemImage: "trash")
+                        }
+                    }
                 }
             }
             .navigationTitle("Friends")
             .navigationBarItems(trailing: Button("Done") {
                 dismiss()
             })
+        }
+    }
+
+    private func removeFriend(_ friend: Friend) {
+        if let index = friends.firstIndex(where: { $0.id == friend.id }) {
+            let removedFriend = friends.remove(at: index)
+            // Add them back to suggestedFriends if not already there
+            if !suggestedFriends.contains(where: { $0.id == removedFriend.id }) {
+                suggestedFriends.append(removedFriend)
+            }
         }
     }
 }
@@ -489,5 +505,5 @@ struct ActivityView: UIViewControllerRepresentable {
 }
 
 #Preview {
-    ProfileView()
+    ProfileView(userProfile: UserProfileModel())
 }

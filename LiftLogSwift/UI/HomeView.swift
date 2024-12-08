@@ -34,7 +34,7 @@ struct HomeView: View {
                         // Header with profile and date
                         HStack {
                             HStack(spacing: 12) {
-                                NavigationLink(destination: ProfileView()) {
+                                NavigationLink(destination: ProfileView(userProfile: userProfile)) {
                                     if let imageURL = userProfile.imageURL(),
                                        let imageData = try? Data(contentsOf: imageURL),
                                        let uiImage = UIImage(data: imageData) {
@@ -58,7 +58,7 @@ struct HomeView: View {
                                 }
                                 
                                 VStack(alignment: .leading) {
-                                    Text("Hello Jane!")
+                                    Text("Hello \(userProfile.name)!")
                                         .foregroundColor(.gray)
                                     Text(formattedDate)
                                         .font(.title2)

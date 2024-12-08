@@ -20,6 +20,7 @@ struct AddFriendsView: View {
     ]
     
     // filter friends based on searchText
+
     var filteredFriends: [Friend] {
         if searchText.isEmpty {
             return suggestedFriends
@@ -27,7 +28,7 @@ struct AddFriendsView: View {
             return suggestedFriends.filter { $0.name.lowercased().contains(searchText.lowercased()) }
         }
     }
-    
+
     var body: some View {
         NavigationView {
             VStack(spacing: 20) {
@@ -39,6 +40,7 @@ struct AddFriendsView: View {
                         .autocapitalization(.none)
                         .disableAutocorrection(true)
                     Button(action: {
+
                     }) {
                         Image(systemName: "slider.horizontal.3")
                             .foregroundColor(.gray)
@@ -48,7 +50,7 @@ struct AddFriendsView: View {
                 .background(Color.gray.opacity(0.1))
                 .cornerRadius(25)
                 .padding(.horizontal)
-                
+
                 // Suggested Friends List
                 ScrollView {
                     VStack(spacing: 12) {
@@ -62,16 +64,20 @@ struct AddFriendsView: View {
                                     .overlay(
                                         Circle().stroke(Color.white, lineWidth: 2)
                                     )
-                                
+
                                 Text(friend.name)
                                     .font(.title3)
-                                
+
                                 Spacer()
-                                
+
                                 Button(action: {
                                     // Add friend to the user's friends list
                                     if !friends.contains(where: { $0.id == friend.id }) {
                                         friends.append(friend)
+                                        // Optionally remove from suggested friends after adding
+                                        if let index = suggestedFriends.firstIndex(where: { $0.id == friend.id }) {
+                                            suggestedFriends.remove(at: index)
+                                        }
                                     }
                                 }) {
                                     if friends.contains(where: { $0.id == friend.id }) {
@@ -130,8 +136,13 @@ struct AddFriendsView_Previews: PreviewProvider {
 
 struct AddFriendsPreviewWrapper: View {
     @State var friends = [Friend]()
+    @State var suggestedFriends = [
+        Friend(id: "1", name: "John Doe", image: "person"),
+        Friend(id: "2", name: "Jane Smith", image: "person.fill"),
+        Friend(id: "3", name: "Chris Lee", image: "person.circle")
+    ]
     
     var body: some View {
-        AddFriendsView(friends: $friends)
+        AddFriendsView(friends: $friends, suggestedFriends: $suggestedFriends)
     }
 }
