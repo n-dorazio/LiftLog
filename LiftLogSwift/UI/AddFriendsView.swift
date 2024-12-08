@@ -10,17 +10,9 @@ import SwiftUI
 struct AddFriendsView: View {
     @Environment(\.presentationMode) var presentationMode
     @Binding var friends: [Friend]
+    @Binding var suggestedFriends: [Friend]
     @State private var searchText = ""
     
-    let suggestedFriends = [
-        Friend(id: "Yousri", name: "Yousri", image: "yousri"),
-        Friend(id: "Kate", name: "Kate", image: "kate"),
-        Friend(id: "Jordan", name: "Jordan", image: "jordan"),
-        Friend(id: "Christine Gonzales", name: "Christine Gonzales", image: "christie")
-    ]
-    
-    // filter friends based on searchText
-
     var filteredFriends: [Friend] {
         if searchText.isEmpty {
             return suggestedFriends
