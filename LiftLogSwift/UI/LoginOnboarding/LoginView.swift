@@ -9,7 +9,7 @@ import SwiftUI
 struct LoginView: View {
     @State private var email: String = ""
     @State private var password: String = ""
-    @State private var twoFACodeInput: String = "" // New variable for 2FA input
+    @State private var twoFACodeInput: String = ""
     @State private var isPasswordHidden: Bool = true
     @State private var isLoggedIn: Bool = false
     @State private var signUp: Bool = false
@@ -45,7 +45,7 @@ struct LoginView: View {
                     // Content (Text, Fields, and Buttons)
                     VStack {
                         // Top Icon
-                        Image("AppLogo") // Add Icon
+                        Image("AppLogo") 
                             .resizable()
                             .frame(width: 100, height: 100)
                             .clipShape(RoundedRectangle(cornerRadius: 12))
@@ -246,7 +246,7 @@ struct LoginView: View {
             }
         }
         .fullScreenCover(isPresented: $isLoggedIn) {
-            ContentView() // Replace with your next screen
+            ContentView()
         }
     }
 

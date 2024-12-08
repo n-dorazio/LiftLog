@@ -72,7 +72,7 @@ class UserProfileModel: ObservableObject {
             friends = try JSONDecoder().decode([Friend].self, from: data)
         } catch {
             print("Error loading friends: \(error)")
-            // Initialize with default friends if needed
+            // Initialize with default friends
             friends = [
                 Friend(id: "John Smith", name: "John Smith", image: "jordan"),
                 Friend(id: "Alice Johnson", name: "Alice Johnson", image: "kate"),
@@ -87,7 +87,7 @@ class UserProfileModel: ObservableObject {
             posts = try JSONDecoder().decode([ExistingPosts].self, from: data)
         } catch {
             print("Error loading posts: \(error)")
-            // Initialize with default posts if needed
+            // Initialize with default posts
             posts = [defaultPost]
         }
     }

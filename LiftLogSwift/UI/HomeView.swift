@@ -133,7 +133,7 @@ struct HomeView: View {
                                 .shadow(color: .gray.opacity(0.1), radius: 10)
                         )
                         .padding(.horizontal)
-                        .onTapGesture { // Tap gesture to trigger modal
+                        .onTapGesture {
                                 withAnimation {
                                 showDetailsModal.toggle()
                             }
@@ -215,7 +215,6 @@ struct ExerciseCard: View {
                         .fill(LinearGradient(colors: [.orange, .red], startPoint: .topLeading, endPoint: .bottomTrailing))
                 )
             
-//            Text("\(calories) Kcal")
             Text("\(calories)")
                 .fontWeight(.semibold)
             Text(title)

@@ -63,7 +63,7 @@ struct ResetPasswordView: View {
 
                     // Reset Method Option
                     HStack {
-                        Image(systemName: "envelope.fill") // Email Icon
+                        Image(systemName: "envelope.fill")
                             .foregroundColor(.orange)
                             .frame(width: 40, height: 40)
 

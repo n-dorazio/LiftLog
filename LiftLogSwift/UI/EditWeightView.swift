@@ -27,7 +27,7 @@ struct EditWeightView: View {
                 Spacer()
                 
                 Button(action: {
-                    presentationMode.wrappedValue.dismiss() // Cancel changes
+                    presentationMode.wrappedValue.dismiss()
                 }) {
                     Text("Cancel")
                         .foregroundColor(.red)

@@ -15,7 +15,6 @@ struct LogView: View {
     var body: some View {
         NavigationView {
             VStack(spacing: 20) {
-                // Custom Tab Picker
                 Picker("View Selection", selection: $selectedTab) {
                     Text("Goals").tag("Goals")
                     Text("My Lift Log").tag("My Lift Log")

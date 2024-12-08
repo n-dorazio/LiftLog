@@ -25,7 +25,7 @@ struct LaunchView: View{
                 .ignoresSafeArea()
                 VStack{
                     Spacer()
-                    Image("AppLogo") //Add Icon
+                    Image("AppLogo")
                         .resizable()
                         .frame(width: 100, height: 100)
                         .clipShape(RoundedRectangle(cornerRadius: 12))
@@ -45,9 +45,6 @@ struct LaunchView: View{
                                 Text("Login")
                                     .font(.headline)
                                     .foregroundColor(.black)
-                                //Spacer()
-                                //Image(systemName: "arrow.right")
-                                  //.foregroundColor(.black)
                             }
                             .padding()
                             .padding(.horizontal, 16)

@@ -471,7 +471,7 @@ struct WorkoutSessionView: View {
             } else if !isPaused {
                 workoutDuration += 1
                 
-                // Show hydration reminder every 30 seconds (for testing)
+                // Show hydration reminder (every 30 seconds for testing. every 20 mins in app)
                 if workoutDuration % 30 == 0 && workoutDuration > 0 {
                     showHydrationReminder = true
                 }

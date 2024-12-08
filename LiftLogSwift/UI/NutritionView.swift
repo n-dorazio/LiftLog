@@ -5,8 +5,6 @@
 //  Created by Nathaniel D'Orazio on 2024-11-21.
 //
 
-
-
 import SwiftUI
 
 struct NutritionView: View {

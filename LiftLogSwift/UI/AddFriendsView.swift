@@ -9,7 +9,7 @@ import SwiftUI
 
 struct AddFriendsView: View {
     @Environment(\.presentationMode) var presentationMode
-    @Binding var friends: [Friend] // Binding to the user's friends list
+    @Binding var friends: [Friend]
     @State private var searchText = ""
     
     let suggestedFriends = [
@@ -19,7 +19,7 @@ struct AddFriendsView: View {
         Friend(id: "Christine Gonzales", name: "Christine Gonzales", image: "christie")
     ]
     
-    // Computed property to filter friends based on searchText
+    // filter friends based on searchText
     var filteredFriends: [Friend] {
         if searchText.isEmpty {
             return suggestedFriends
@@ -39,7 +39,6 @@ struct AddFriendsView: View {
                         .autocapitalization(.none)
                         .disableAutocorrection(true)
                     Button(action: {
-                        // Optionally handle filter options
                     }) {
                         Image(systemName: "slider.horizontal.3")
                             .foregroundColor(.gray)
@@ -123,7 +122,6 @@ struct Friend: Identifiable, Equatable, Codable {
     let image: String
 }
 
-// Updated Preview
 struct AddFriendsView_Previews: PreviewProvider {
     static var previews: some View {
         AddFriendsPreviewWrapper()
